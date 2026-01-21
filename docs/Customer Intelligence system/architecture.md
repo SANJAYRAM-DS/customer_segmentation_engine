@@ -107,9 +107,9 @@ All outputs are:
 flowchart TD
     A[Source Systems<br/>Orders<br/>Sessions<br/>Returns<br/>Customer Metadata]
 
-    B[Data Validation & Normalization<br/>• Schema checks<br/>• Type enforcement<br/>• Missing handling]
+    B[Data Validation & Normalization<br/>Schema checks<br/>Type enforcement<br/>Missing handling]
 
-    C[Feature Engineering<br/>• Time-windowed aggregations<br/>• Behavioral signals<br/>• Leakage-safe logic]
+    C[Feature Engineering<br/>Time-windowed aggregations<br/>Behavioral signals<br/>Leakage-safe logic]
 
     D[Feature Store<br/>(Versioned)]
 
@@ -118,7 +118,7 @@ flowchart TD
 
     G[Model Registry]
 
-    H[Output Surfaces<br/>• API<br/>• Tables<br/>• Dashboards]
+    H[Output Surfaces<br/>API<br/>Tables<br/>Dashboards]
 
     A --> B
     B --> C
@@ -127,6 +127,7 @@ flowchart TD
     D --> F
     E --> G
     F --> H
+
 ```
 
 ## Design Principles
