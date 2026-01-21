@@ -105,20 +105,20 @@ All outputs are:
 
 ```mermaid
 flowchart TD
-    A[Source Systems\nOrders\nSessions\nReturns\nCustomer Metadata]
+    A[Source Systems<br>Orders<br>Sessions<br>Returns<br>Customer Metadata]
 
-    B[Data Validation and Normalization\nSchema checks\nType enforcement\nMissing handling]
+    B[Data Validation and Normalization<br>Schema checks<br>Type enforcement<br>Missing handling]
 
-    C[Feature Engineering\nTime window aggregations\nBehavioral signals\nLeakage safe logic]
+    C[Feature Engineering<br>Time window aggregations<br>Behavioral signals<br>Leakage safe logic]
 
-    D[Feature Store\nVersioned]
+    D[Feature Store<br>Versioned]
 
     E[Training Pipelines]
     F[Inference Pipelines]
 
     G[Model Registry]
 
-    H[Output Surfaces\nAPI\nTables\nDashboards]
+    H[Output Surfaces<br>API<br>Tables<br>Dashboards]
 
     A --> B
     B --> C
@@ -127,6 +127,7 @@ flowchart TD
     D --> F
     E --> G
     F --> H
+
 
 ```
 
