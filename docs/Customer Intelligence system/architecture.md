@@ -105,24 +105,16 @@ All outputs are:
 
 ```mermaid
 flowchart TD
-    A[Source Systems<br/>Orders<br/>Sessions<br/>Returns<br/>Customer Metadata]
-
-    B[Data Validation & Normalization<br/>Schema checks<br/>Type enforcement<br/>Missing handling]
-
-    C[Feature Engineering<br/>Time-windowed aggregations<br/>Behavioral signals<br/>Leakage-safe logic]
-
-    D[Feature Store<br/>(Versioned)]
-
+    A[Source Systems Orders Sessions Returns]
+    B[Validation Schema Types Missing]
+    C[Feature Engineering Time Windows Leakage Safe]
+    D[Feature Store Versioned]
     E[Training Pipelines]
     F[Inference Pipelines]
-
     G[Model Registry]
+    H[API Tables Dashboards]
 
-    H[Output Surfaces<br/>API<br/>Tables<br/>Dashboards]
-
-    A --> B
-    B --> C
-    C --> D
+    A --> B --> C --> D
     D --> E
     D --> F
     E --> G
