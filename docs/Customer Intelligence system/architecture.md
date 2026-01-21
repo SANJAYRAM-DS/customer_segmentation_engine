@@ -2,121 +2,132 @@
 
 ## Overview
 
-The Customer Intelligence System is a modular, batch-first predictive system designed to generate customer-level intelligence signals such as churn risk, customer lifetime value (CLV), and behavioral segments.
+The Customer Intelligence System is a modular, batch-first predictive platform designed to generate **customer-level intelligence signals** such as churn risk, customer lifetime value (CLV), and behavioral segments.
 
-The architecture separates data ingestion, feature computation, modeling, and output delivery to ensure scalability, reproducibility, and governance.
+The architecture intentionally separates **data ingestion, feature computation, modeling, and output delivery** to ensure scalability, reproducibility, governance, and long-term maintainability.
 
 ---
 
-## High-Level Architecture
+## High-Level Flow
 
-Raw Data → Validation → Feature Engineering → Models → Output Surfaces → Consumers
+**Raw Data → Validation → Feature Engineering → Models → Output Surfaces → Consumers**
 
-### Core Layers
+---
 
-1. Data Sources
-2. Feature Engineering Layer
-3. Modeling Layer
-4. Output Layer
-5. Monitoring & Governance
+## Core Architectural Layers
+
+1. Data Sources  
+2. Data Validation & Normalization  
+3. Feature Engineering Layer  
+4. Modeling Layer  
+5. Output & Consumption Layer  
+6. Monitoring & Governance  
 
 ---
 
 ## Data Sources
 
-- Orders
-- Sessions
-- Returns
-- Customer Metadata
+The system ingests batch data from multiple upstream systems:
 
-All data is assumed to be linked by a stable customer identifier provided upstream.
+- Orders  
+- Sessions  
+- Returns  
+- Customer Metadata  
+
+All datasets are assumed to be linked via a **stable customer identifier** provided by upstream systems.  
+Identity resolution is considered out of scope.
+
+---
+
+## Data Validation & Normalization
+
+Incoming data is validated before any downstream processing to ensure correctness and consistency.
+
+Key responsibilities:
+- Schema validation
+- Data type enforcement
+- Missing value handling
+- Basic sanity checks (ranges, null thresholds)
+
+This layer acts as a **data quality gate** for the entire system.
 
 ---
 
 ## Feature Engineering Layer
 
+The feature engineering layer produces **time-aware, leakage-safe customer features** shared across all models.
+
+Capabilities:
 - Time-windowed aggregations (7d / 30d / 90d)
-- Snapshot-based computation
+- Snapshot-based feature computation
 - Leakage-safe transformations
 - Shared feature definitions across models
 
-Optionally backed by a versioned feature store.
+Features may be optionally backed by a **versioned feature store** to support reproducibility and offline–online consistency.
 
 ---
 
 ## Modeling Layer
 
-Independent but coordinated models:
-- Churn prediction (classification or survival)
-- CLV estimation (regression or survival)
-- Customer segmentation (KMeans / HDBSCAN)
-- Optional behavior embeddings
+The modeling layer consists of **independent but coordinated models** operating on the shared feature set.
 
-Models are trained and deployed independently but share the same feature layer.
+Supported model types:
+- Churn prediction (classification or survival analysis)
+- Customer Lifetime Value (CLV) estimation (regression or survival)
+- Customer segmentation (KMeans / HDBSCAN)
+- Optional behavioral embeddings
+
+Models are:
+- Trained independently
+- Versioned and registered centrally
+- Deployed via batch inference pipelines
 
 ---
 
-## Output Layer
+## Output & Consumption Layer
 
+Model outputs are published as **customer-level intelligence artifacts**.
+
+Output surfaces include:
 - API: `/customer/profile`
 - Analytical tables: `customer_risk_scores`
 - Dashboards: Customer Health Overview
 
-All outputs are customer-level, versioned, and timestamped.
+All outputs are:
+- Versioned
+- Timestamped
+- Auditable
+- Safe for downstream consumption
 
 ---
-## System Architecture
 
-┌───────────────────────┐
-│   Source Systems      │
-│                       │
-│ Orders                │
-│ Sessions              │
-│ Returns               │
-│ Customer Metadata     │
-└──────────┬────────────┘
-           │
-           ▼
-┌──────────────────────┐
-│ Data Validation      │
-│ & Normalization      │
-│                      │
-│ - Schema checks      │
-│ - Type enforcement   │
-│ - Missing handling   │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│ Feature Engineering  │
-│                      │
-│ - Time-windowed aggs │
-│ - Behavioral signals │
-│ - Leakage-safe logic │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│ Feature Store        │
-│ (Versioned)          │
-└──────┬────────┬──────┘
-       │        │
-       ▼        ▼
-┌────────────┐ ┌────────────┐
-│ Training   │ │ Inference  │
-│ Pipelines  │ │ Pipelines  │
-└─────┬──────┘ └─────┬──────┘
-      │              │
-      ▼              ▼
-┌────────────┐ ┌──────────────────┐
-│ Model      │ │ Output Surfaces  │
-│ Registry   │ │                  │
-│            │ │ API              │
-│            │ │ Tables           │
-│            │ │ Dashboards       │
-└────────────┘ └──────────────────┘
+## System Architecture Diagram
 
----
+```mermaid
+flowchart TD
+    A[Source Systems<br/>Orders<br/>Sessions<br/>Returns<br/>Customer Metadata]
+
+    B[Data Validation & Normalization<br/>• Schema checks<br/>• Type enforcement<br/>• Missing handling]
+
+    C[Feature Engineering<br/>• Time-windowed aggregations<br/>• Behavioral signals<br/>• Leakage-safe logic]
+
+    D[Feature Store<br/>(Versioned)]
+
+    E[Training Pipelines]
+    F[Inference Pipelines]
+
+    G[Model Registry]
+
+    H[Output Surfaces<br/>• API<br/>• Tables<br/>• Dashboards]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    D --> F
+    E --> G
+    F --> H
+
 
 ## Design Principles
 
