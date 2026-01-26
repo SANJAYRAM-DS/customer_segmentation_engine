@@ -9,9 +9,9 @@ import { RiskTrendChart } from '@/components/charts/RiskTrendChart';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { fetchCustomers, fetchCustomerById } from '@/lib/api';
+import { fetchCustomers, fetchCustomerById } from '../lib/api';
 import { useDashboardStore } from '@/store/dashboardStore';
-import type { Customer } from '@/lib/types';
+import type { Customer } from '../lib/types';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   DollarSign,

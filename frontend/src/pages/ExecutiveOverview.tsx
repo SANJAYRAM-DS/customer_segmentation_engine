@@ -20,8 +20,8 @@ import {
   fetchSegmentDistribution,
   fetchHealthDistribution,
   fetchHighValueAtRisk,
-} from '@/lib/api';
-import type { KPISummary, SegmentDistribution, HealthDistribution, Customer } from '@/lib/types';
+} from '../lib/api';
+import type { KPISummary, SegmentDistribution, HealthDistribution, Customer } from '../lib/types';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { ColumnDef } from '@tanstack/react-table';
 

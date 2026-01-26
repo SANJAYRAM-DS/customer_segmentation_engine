@@ -12,8 +12,8 @@ import {
   fetchPriorityMatrix,
   fetchCustomers,
   fetchKPISummary,
-} from '@/lib/api';
-import type { HealthDistribution, Customer, KPISummary } from '@/lib/types';
+} from '../lib/api';
+import type { HealthDistribution, Customer, KPISummary } from '../lib/types';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { ColumnDef } from '@tanstack/react-table';
 

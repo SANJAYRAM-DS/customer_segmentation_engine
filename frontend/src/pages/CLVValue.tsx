@@ -11,8 +11,8 @@ import {
   fetchCLVTrend,
   fetchSegmentDistribution,
   fetchKPISummary,
-} from '@/lib/api';
-import type { CLVDistribution, SegmentDistribution, KPISummary } from '@/lib/types';
+} from '../lib/api';
+import type { CLVDistribution, SegmentDistribution, KPISummary } from '../lib/types';
 
 export default function CLVValue() {
   const [clvDistribution, setCLVDistribution] = useState<CLVDistribution[]>([]);

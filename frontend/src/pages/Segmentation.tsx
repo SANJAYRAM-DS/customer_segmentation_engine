@@ -6,7 +6,7 @@ import { SegmentBarChart } from '@/components/charts/SegmentBarChart';
 import { SegmentRadarChart } from '@/components/charts/SegmentRadarChart';
 import { DataTable } from '@/components/dashboard/DataTable';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
-import { fetchSegmentDistribution, fetchSegmentComparison } from '@/lib/api';
+import { fetchSegmentDistribution, fetchSegmentComparison } from '../lib/api';
 import type { SegmentDistribution } from '@/lib/types';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { ColumnDef } from '@tanstack/react-table';

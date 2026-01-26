@@ -11,8 +11,8 @@ import {
   fetchChurnRiskDistribution,
   fetchRiskTrend,
   fetchHighValueAtRisk,
-} from '@/lib/api';
-import type { ChurnRiskDistribution, RiskTrend, Customer } from '@/lib/types';
+} from '../lib/api';
+import type { ChurnRiskDistribution, RiskTrend, Customer } from '../lib/types';
 import { ColumnDef } from '@tanstack/react-table';
 import { Phone, Mail } from 'lucide-react';
 
