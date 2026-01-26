@@ -4,9 +4,9 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { ChartContainer } from '@/components/dashboard/ChartContainer';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { Button } from '@/components/ui/button';
-import { fetchAlerts, acknowledgeAlert } from '@/lib/api';
-import type { Alert } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { fetchAlerts, acknowledgeAlert } from '../lib/api';
+import type { Alert } from '../lib/types';
+import { cn } from '../lib/utils';
 import {
   AlertTriangle,
   TrendingUp,
