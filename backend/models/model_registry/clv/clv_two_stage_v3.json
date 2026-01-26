@@ -1,0 +1,50 @@
+{
+  "model": "clv_two_stage",
+  "version": 3,
+  "dataset_fingerprint": "83748825f3937cac531e19667010d1eb",
+  "metrics": {
+    "purchase_auc": null,
+    "clv": {
+      "rmse": 1.8579692749170185,
+      "mae": 0.47434246318267664,
+      "r2": 0.0
+    }
+  },
+  "config": {
+    "model": {
+      "name": "clv_two_stage",
+      "random_state": 42
+    },
+    "data": {
+      "features_path": "backend/data/processed/clv/features.parquet",
+      "target": "future_90d_spend",
+      "id_col": "customer_id"
+    },
+    "features": {
+      "log_scaled": [
+        "recency_days",
+        "tenure_days",
+        "order_count",
+        "total_spend",
+        "avg_order_value",
+        "order_frequency",
+        "session_count",
+        "session_frequency",
+        "avg_session_duration",
+        "avg_pages",
+        "spend_7d",
+        "spend_30d",
+        "spend_90d",
+        "orders_7d",
+        "orders_30d",
+        "orders_90d",
+        "sessions_7d",
+        "sessions_30d"
+      ],
+      "rate": [
+        "return_rate",
+        "discount_rate"
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+model:
+  name: clv_two_stage
+  random_state: 42
+
+data:
+  features_path: backend/data/processed/clv/features.parquet
+  target: future_90d_spend
+  id_col: customer_id
+
+features:
+  log_scaled:
+    - recency_days
+    - tenure_days
+    - order_count
+    - total_spend
+    - avg_order_value
+    - order_frequency
+    - session_count
+    - session_frequency
+    - avg_session_duration
+    - avg_pages
+    - spend_7d
+    - spend_30d
+    - spend_90d
+    - orders_7d
+    - orders_30d
+    - orders_90d
+    - sessions_7d
+    - sessions_30d
+
+  rate:
+    - return_rate
+    - discount_rate

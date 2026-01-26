@@ -1,0 +1,8 @@
+{
+  "model": "clv",
+  "version": 3,
+  "timestamp": "2026-01-25T05:23:07.540699+00:00",
+  "rows": 100000,
+  "dataset_fingerprint": "f95e38d1bc89cfc76c87ed251740b5e8",
+  "path": "E:\\SYSTEM1-now - gravity\\backend\\monitoring\\predictions\\clv\\predictions_2026-01-25T05-23-07.540699+00-00.parquet"
+}

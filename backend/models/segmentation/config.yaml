@@ -1,0 +1,20 @@
+model:
+  name: customer_segmentation
+  random_state: 42
+  default_k: 4
+
+data:
+  features_path: backend/data/processed/segmentation/features.parquet
+  id_col: customer_id
+
+training:
+  max_silhouette_sample: 20000
+  drop_cold_start: true
+
+features:
+  used:
+    - recency_days
+    - order_count
+    - total_spend
+    - session_frequency
+    - return_rate

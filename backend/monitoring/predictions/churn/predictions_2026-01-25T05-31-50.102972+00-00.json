@@ -1,0 +1,8 @@
+{
+  "model": "churn",
+  "version": 4,
+  "timestamp": "2026-01-25T05:31:50.102972+00:00",
+  "rows": 100000,
+  "dataset_fingerprint": "7f5ab7680cecdabbe8deedd909e09d24",
+  "path": "E:\\SYSTEM1-now - gravity\\backend\\monitoring\\predictions\\churn\\predictions_2026-01-25T05-31-50.102972+00-00.parquet"
+}

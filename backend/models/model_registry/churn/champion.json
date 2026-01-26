@@ -1,0 +1,10 @@
+{
+  "model_name": "churn",
+  "version": 4,
+  "metrics": {
+    "roc_auc": NaN,
+    "pr_auc": 1.0
+  },
+  "promoted_at": "2026-01-25T05:25:22.162093+00:00",
+  "reason": "Auto-promotion: better PR-AUC"
+}

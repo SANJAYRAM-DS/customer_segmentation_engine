@@ -1,0 +1,54 @@
+{
+  "model": "churn_logistic",
+  "version": 3,
+  "dataset_fingerprint": "9f0da255889561148b4851bb4c926540",
+  "metrics": {
+    "train": {
+      "roc_auc": 0.8342883200068586,
+      "pr_auc": 0.9585068928924104
+    },
+    "future": {
+      "roc_auc": NaN,
+      "pr_auc": 1.0
+    }
+  },
+  "config": {
+    "model": {
+      "name": "churn_logistic",
+      "random_state": 42
+    },
+    "data": {
+      "features_path": "backend/data/processed/churn/features.parquet",
+      "target": "churn_90d",
+      "id_col": "customer_id"
+    },
+    "features": {
+      "categorical": [
+        "country",
+        "acquisition_channel",
+        "device_type"
+      ],
+      "log_scaled": [
+        "recency_days",
+        "tenure_days",
+        "order_count",
+        "total_spend",
+        "avg_order_value",
+        "order_frequency",
+        "session_count",
+        "session_frequency",
+        "avg_session_duration",
+        "avg_pages"
+      ],
+      "rate": [
+        "return_rate",
+        "discount_rate"
+      ]
+    },
+    "training": {
+      "temporal_split_ratio": 0.8,
+      "calibrate": true,
+      "calibration_cv": 3
+    }
+  }
+}

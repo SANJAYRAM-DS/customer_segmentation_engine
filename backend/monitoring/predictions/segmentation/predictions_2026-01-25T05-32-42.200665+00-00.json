@@ -1,0 +1,8 @@
+{
+  "model": "segmentation",
+  "version": 3,
+  "timestamp": "2026-01-25T05:32:42.200665+00:00",
+  "rows": 100000,
+  "dataset_fingerprint": "2913c809a738dc0af8fc1433fd9a8aea",
+  "path": "E:\\SYSTEM1-now - gravity\\backend\\monitoring\\predictions\\segmentation\\predictions_2026-01-25T05-32-42.200665+00-00.parquet"
+}

@@ -1,0 +1,11 @@
+{
+  "numeric": {
+    "recency_days": 4.952436699040146,
+    "tenure_days": 6.3566839714037595,
+    "order_frequency": 5.3525252372509255,
+    "total_spend": 5.096136235179093
+  },
+  "categorical": {},
+  "severe": true,
+  "timestamp": "2026-01-25T05:32:37.676198+00:00"
+}

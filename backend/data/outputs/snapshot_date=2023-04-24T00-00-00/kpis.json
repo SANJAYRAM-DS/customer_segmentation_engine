@@ -1,0 +1,7 @@
+{
+  "total_customers":100000,
+  "avg_churn_prob":0.77214793,
+  "avg_clv":76.374759053,
+  "snapshot_date":"2023-04-24T00-00-00",
+  "total_spend_30d":1128221.45
+}
