@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { ChartContainer } from '@/components/dashboard/ChartContainer';
-import { ChurnRiskHistogram } from '@/components/charts/ChurnRiskHistogram';
-import { RiskTrendChart } from '@/components/charts/RiskTrendChart';
-import { DataTable } from '@/components/dashboard/DataTable';
-import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
-import { Button } from '@/components/ui/button';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { ChartContainer } from '../components/dashboard/ChartContainer';
+import { ChurnRiskHistogram } from '../components/charts/ChurnRiskHistogram';
+import { RiskTrendChart } from '../components/charts/RiskTrendChart';
+import { DataTable } from '../components/dashboard/DataTable';
+import { StatusBadge, PriorityBadge } from '../components/dashboard/StatusBadge';
+import { Button } from '../components/ui/button';
 import {
   fetchChurnRiskDistribution,
   fetchRiskTrend,

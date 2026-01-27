@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import type { HealthDistribution } from '@/lib/types';
+import type { HealthDistribution } from '../../lib/types';
 
 interface HealthDistributionChartProps {
   data: HealthDistribution[];

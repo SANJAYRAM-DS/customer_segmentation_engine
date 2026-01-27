@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import type { RiskTrend } from '@/lib/types';
+import type { RiskTrend } from '../../lib/types';
 
 interface RiskTrendChartProps {
   data: RiskTrend[];

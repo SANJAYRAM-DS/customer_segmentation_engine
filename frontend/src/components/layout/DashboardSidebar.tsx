@@ -12,8 +12,8 @@ import {
   ChevronRight,
   BarChart3,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useDashboardStore } from '@/store/dashboardStore';
+import { cn } from '../../lib/utils';
+import { useDashboardStore } from '../../store/dashboardStore';
 
 const navigation = [
   { name: 'Executive Overview', href: '/', icon: LayoutDashboard },

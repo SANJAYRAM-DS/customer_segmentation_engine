@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
-import type { HealthBand, SegmentType, InvestmentPriority } from '@/lib/types';
+import { cn } from '../../lib/utils';
+import type { HealthBand, SegmentType, InvestmentPriority } from '../../lib/types';
 
 interface StatusBadgeProps {
   status: HealthBand | SegmentType | 'low' | 'medium' | 'high' | 'critical';

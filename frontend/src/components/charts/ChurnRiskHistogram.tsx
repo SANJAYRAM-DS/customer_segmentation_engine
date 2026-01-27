@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import type { ChurnRiskDistribution } from '@/lib/types';
+import type { ChurnRiskDistribution } from '../../lib/types';
 
 interface ChurnRiskHistogramProps {
   data: ChurnRiskDistribution[];

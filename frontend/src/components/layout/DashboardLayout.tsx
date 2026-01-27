@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
 import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardHeader } from './DashboardHeader';
-import { useDashboardStore } from '@/store/dashboardStore';
-import { cn } from '@/lib/utils';
+import { useDashboardStore } from '../../store/dashboardStore';
+import { cn } from '../../lib/utils';
 
 interface DashboardLayoutProps {
   children: ReactNode;

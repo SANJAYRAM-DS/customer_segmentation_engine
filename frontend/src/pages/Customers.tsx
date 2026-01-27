@@ -1,16 +1,16 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { ChartContainer } from '@/components/dashboard/ChartContainer';
-import { DataTable } from '@/components/dashboard/DataTable';
-import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
-import { HealthGauge } from '@/components/charts/HealthGauge';
-import { RiskTrendChart } from '@/components/charts/RiskTrendChart';
-import { KPICard } from '@/components/dashboard/KPICard';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { ChartContainer } from '../components/dashboard/ChartContainer';
+import { DataTable } from '../components/dashboard/DataTable';
+import { StatusBadge, PriorityBadge } from '../components/dashboard/StatusBadge';
+import { HealthGauge } from '../components/charts/HealthGauge';
+import { RiskTrendChart } from '../components/charts/RiskTrendChart';
+import { KPICard } from '../components/dashboard/KPICard';
+import { Button } from '../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { fetchCustomers, fetchCustomerById } from '../lib/api';
-import { useDashboardStore } from '@/store/dashboardStore';
+import { useDashboardStore } from '../store/dashboardStore';
 import type { Customer } from '../lib/types';
 import { ColumnDef } from '@tanstack/react-table';
 import {

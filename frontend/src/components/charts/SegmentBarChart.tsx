@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import type { SegmentDistribution } from '@/lib/types';
+import type { SegmentDistribution } from '../../lib/types';
 
 interface SegmentBarChartProps {
   data: any[]; // Relax type to allow ad-hoc objects from Segmentation.tsx

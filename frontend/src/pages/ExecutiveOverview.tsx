@@ -8,13 +8,13 @@ import {
   TrendingDown,
   Activity,
 } from 'lucide-react';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { KPICard } from '@/components/dashboard/KPICard';
-import { ChartContainer } from '@/components/dashboard/ChartContainer';
-import { SegmentDonutChart } from '@/components/charts/SegmentDonutChart';
-import { HealthDistributionChart } from '@/components/charts/HealthDistributionChart';
-import { DataTable } from '@/components/dashboard/DataTable';
-import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { KPICard } from '../components/dashboard/KPICard';
+import { ChartContainer } from '../components/dashboard/ChartContainer';
+import { SegmentDonutChart } from '../components/charts/SegmentDonutChart';
+import { HealthDistributionChart } from '../components/charts/HealthDistributionChart';
+import { DataTable } from '../components/dashboard/DataTable';
+import { StatusBadge, PriorityBadge } from '../components/dashboard/StatusBadge';
 import {
   fetchKPISummary,
   fetchSegmentDistribution,
@@ -22,7 +22,7 @@ import {
   fetchHighValueAtRisk,
 } from '../lib/api';
 import type { KPISummary, SegmentDistribution, HealthDistribution, Customer } from '../lib/types';
-import { useDashboardStore } from '@/store/dashboardStore';
+import { useDashboardStore } from '../store/dashboardStore';
 import { ColumnDef } from '@tanstack/react-table';
 
 const atRiskColumns: ColumnDef<Customer>[] = [

@@ -7,7 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { CLVDistribution } from '@/lib/types';
+import type { CLVDistribution } from '../../lib/types';
 
 interface CLVDistributionChartProps {
   data: CLVDistribution[];

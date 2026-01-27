@@ -1,15 +1,15 @@
 import { useLocation } from 'react-router-dom';
 import { Bell, Download, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useDashboardStore } from '@/store/dashboardStore';
+import { Button } from '../../components/ui/button';
+import { useDashboardStore } from '../../store/dashboardStore';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import type { SegmentType, HealthBand } from '@/lib/types';
+} from "../../components/ui/select";
+import type { SegmentType, HealthBand } from '../../lib/types';
 
 const pageNames: Record<string, string> = {
   '/': 'Executive Overview',

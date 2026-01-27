@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { ChartContainer } from '@/components/dashboard/ChartContainer';
-import { SegmentBarChart } from '@/components/charts/SegmentBarChart';
-import { SegmentRadarChart } from '@/components/charts/SegmentRadarChart';
-import { DataTable } from '@/components/dashboard/DataTable';
-import { StatusBadge } from '@/components/dashboard/StatusBadge';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { ChartContainer } from '../components/dashboard/ChartContainer';
+import { SegmentBarChart } from '../components/charts/SegmentBarChart';
+import { SegmentRadarChart } from '../components/charts/SegmentRadarChart';
+import { DataTable } from '../components/dashboard/DataTable';
+import { StatusBadge } from '../components/dashboard/StatusBadge';
 import { fetchSegmentDistribution, fetchSegmentComparison } from '../lib/api';
-import type { SegmentDistribution } from '@/lib/types';
-import { useDashboardStore } from '@/store/dashboardStore';
+import type { SegmentDistribution } from '../lib/types';
+import { useDashboardStore } from '../store/dashboardStore';
 import { ColumnDef } from '@tanstack/react-table';
 
 const segmentColumns: ColumnDef<SegmentDistribution>[] = [

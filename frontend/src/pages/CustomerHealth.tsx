@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { ChartContainer } from '@/components/dashboard/ChartContainer';
-import { HealthDistributionChart } from '@/components/charts/HealthDistributionChart';
-import { HealthGauge } from '@/components/charts/HealthGauge';
-import { PriorityMatrix } from '@/components/charts/PriorityMatrix';
-import { DataTable } from '@/components/dashboard/DataTable';
-import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { ChartContainer } from '../components/dashboard/ChartContainer';
+import { HealthDistributionChart } from '../components/charts/HealthDistributionChart';
+import { HealthGauge } from '../components/charts/HealthGauge';
+import { PriorityMatrix } from '../components/charts/PriorityMatrix';
+import { DataTable } from '../components/dashboard/DataTable';
+import { StatusBadge, PriorityBadge } from '../components/dashboard/StatusBadge';
 import {
   fetchHealthDistribution,
   fetchPriorityMatrix,
@@ -14,7 +14,7 @@ import {
   fetchKPISummary,
 } from '../lib/api';
 import type { HealthDistribution, Customer, KPISummary } from '../lib/types';
-import { useDashboardStore } from '@/store/dashboardStore';
+import { useDashboardStore } from '../store/dashboardStore';
 import { ColumnDef } from '@tanstack/react-table';
 
 const customerColumns: ColumnDef<Customer>[] = [

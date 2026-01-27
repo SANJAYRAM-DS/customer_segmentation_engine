@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { FilterState, SegmentType, HealthBand, InvestmentPriority } from '@/lib/types';
+import type { FilterState, SegmentType, HealthBand, InvestmentPriority } from '../lib/types';
 
 interface DashboardState {
   // Filter state

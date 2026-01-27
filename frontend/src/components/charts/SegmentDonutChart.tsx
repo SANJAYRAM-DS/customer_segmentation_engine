@@ -6,7 +6,7 @@ import {
   Legend,
   Tooltip,
 } from 'recharts';
-import type { SegmentDistribution } from '@/lib/types';
+import type { SegmentDistribution } from '../../lib/types';
 
 interface SegmentDonutChartProps {
   data: SegmentDistribution[];

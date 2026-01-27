@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { ChartContainer } from '@/components/dashboard/ChartContainer';
-import { CLVDistributionChart } from '@/components/charts/CLVDistributionChart';
-import { CLVTrendChart } from '@/components/charts/CLVTrendChart';
-import { SegmentBarChart } from '@/components/charts/SegmentBarChart';
-import { KPICard } from '@/components/dashboard/KPICard';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { ChartContainer } from '../components/dashboard/ChartContainer';
+import { CLVDistributionChart } from '../components/charts/CLVDistributionChart';
+import { CLVTrendChart } from '../components/charts/CLVTrendChart';
+import { SegmentBarChart } from '../components/charts/SegmentBarChart';
+import { KPICard } from '../components/dashboard/KPICard';
 import { DollarSign, TrendingUp, Users, Award } from 'lucide-react';
 import {
   fetchCLVDistribution,
