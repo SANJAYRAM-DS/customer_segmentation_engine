@@ -178,7 +178,7 @@ def main():
             indent=2,
         )
 
-    # ✅ CHAMPION–CHALLENGER DECISION (CORRECT LOCATION)
+    # CHAMPION–CHALLENGER DECISION
     current = load_champion(REGISTRY_DIR)
 
     if current is None or better_churn(metrics["future"], current["metrics"]):
