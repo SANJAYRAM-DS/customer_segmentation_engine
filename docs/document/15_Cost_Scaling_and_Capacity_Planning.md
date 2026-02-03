@@ -79,6 +79,22 @@ Controls:
 
 ---
 
+### 15.1.5 Cost Ownership
+
+Each cost domain has a named owner:
+
+- Data ingestion & storage → Data platform owner
+- Training compute → ML engineering owner
+- Inference & serving → Platform owner
+- Monitoring & logging → Reliability owner
+
+Cost owners are accountable for:
+- Budget adherence
+- Optimization decisions
+- Justifying spend growth
+
+---
+
 ## 15.2 Scaling Strategy
 
 The system is designed to scale **predictably and linearly** with customer growth.
@@ -189,6 +205,31 @@ Limits are enforced programmatically.
 
 ---
 
+### 15.4.4 Cost-Based Kill Criteria
+
+Automatic safeguards trigger when:
+- Spend exceeds budget by predefined thresholds
+- Cost grows faster than business impact
+- Low-ROI components exceed cost caps
+
+Safeguards may include:
+- Pausing retraining
+- Throttling inference
+- Disabling non-critical monitoring
+
+---
+
+### 15.4.5 Cost Impact Review for Changes
+
+New models or features require:
+- Estimated incremental cost
+- Expected business impact
+- Approval if cost exceeds thresholds
+
+No component is added without economic justification.
+
+---
+
 ## 15.5 Business ROI Alignment
 
 Costs are justified relative to **business impact**.
@@ -212,6 +253,17 @@ ROI tracked via:
   - Feature cost vs marginal improvement
 - Models or features that do not justify cost are deprecated
 
+### Cost Attribution
+
+Costs are attributed at:
+- Model level
+- Feature group level
+
+This enables:
+- Identifying high-cost / low-impact components
+- Targeted deprecation
+- Informed trade-offs during model design
+
 ---
 
 ## 15.6 Summary
@@ -222,5 +274,14 @@ This cost and scaling strategy ensures:
 - Safe scaling under business growth
 - Explicit economic guardrails
 - Continuous alignment between cost and value
+
+### Cost Decay & Decommissioning
+
+The system enforces periodic:
+- Feature deprecation reviews
+- Model retirement
+- Data retention pruning
+
+Unused or low-impact components are removed to prevent cost accumulation.
 
 > “A model that improves accuracy but destroys ROI is a failed system.”

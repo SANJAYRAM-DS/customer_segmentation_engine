@@ -100,6 +100,45 @@ Even with stable features, **model performance can degrade** over time due to be
   - MLops team
   - Business stakeholders if high-risk
 
+### Alert-to-Action Mapping
+
+Each alert type has a predefined response.
+
+| Alert Type | Severity | Default Action |
+|----------|---------|----------------|
+| Feature PSI spike | Medium | Feature review |
+| Missingness surge | High | Block inference / fallback |
+| AUC degradation | High | Shadow retraining |
+| Calibration drift | Medium | Threshold review |
+| Segment instability | Medium | Segment audit |
+
+Alerts without a defined action are not considered valid.
+
+### Alert Severity & Escalation
+
+Alerts are classified as:
+- **Info**: Logged for trend analysis
+- **Warning**: Requires review within SLA
+- **Critical**: Immediate action required
+
+Critical alerts:
+- Page on-call engineer
+- May trigger automatic safeguards
+
+---
+
+### 11.2.4 Intervention-Aware Monitoring
+
+Monitoring distinguishes between:
+- Natural behavior drift
+- Intervention-induced behavior changes
+
+Where possible:
+- Predictions are tagged with downstream actions
+- Performance is evaluated separately for treated vs untreated cohorts
+
+This prevents feedback loops from silently contaminating training data.
+
 ---
 
 ## 11.3 Retraining Triggers
@@ -114,6 +153,17 @@ Retraining is **event-driven**, not strictly calendar-based, though periodic ret
 - Model performance degradation detected
 - New cohort behaviors (e.g., marketing campaigns, onboarding surge)
 - Feature store schema changes or updates
+
+### Drift Remediation Principles
+
+Not all drift requires retraining.
+
+- Data drift → investigate pipelines and features
+- Calibration drift → adjust thresholds
+- Semantic drift → feature redesign
+- Performance drift → retraining
+
+Retraining is a last resort, not a reflex.
 
 ---
 
@@ -153,6 +203,16 @@ This ensures:
 
 ---
 
+### 11.3.5 Retraining Cooldown & Stability Controls
+
+After retraining:
+- A minimum stabilization period is enforced
+- Additional retraining is suppressed unless critical alerts fire
+
+This prevents overreaction to transient noise.
+
+--
+
 ## 11.4 Summary
 
 Monitoring and retraining strategy ensures:
@@ -161,5 +221,14 @@ Monitoring and retraining strategy ensures:
 - **Predictive trustworthiness:** KPIs monitored continuously
 - **Adaptation to behavior change:** Retraining triggered by meaningful signals
 - **Auditability:** Every retraining and drift alert logged
+
+## Monitoring System Health
+
+The monitoring system itself is monitored for:
+- Data freshness
+- Alert delivery failures
+- Metric computation errors
+
+Silent monitoring failures are treated as high-risk incidents.
 
 > By combining feature-level, model-level, and cohort-level monitoring, the Customer Intelligence System remains trustworthy and actionable over time.

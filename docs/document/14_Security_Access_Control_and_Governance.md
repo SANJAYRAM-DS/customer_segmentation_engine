@@ -2,7 +2,7 @@
 
 ---
 
-This section defines how the Customer Intelligence System is **secured, governed, and audited**.  
+This section defines how the Customer Intelligence System is **secured, governed, and audited**.
 It ensures that data, models, and decisions are protected against misuse, accidental exposure, and unauthorized change.
 
 Security is treated as a **first-class system requirement**, not an afterthought.
@@ -11,7 +11,7 @@ Security is treated as a **first-class system requirement**, not an afterthought
 
 ## 14.1 Access Control & Authentication
 
-All access follows the **principle of least privilege**:  
+All access follows the **principle of least privilege**:
 users and systems receive **only the minimum permissions required** to perform their function.
 
 ---
@@ -70,6 +70,32 @@ Access is granted via clearly defined roles.
   - All access is user- or service-account–scoped
   - All actions are attributable
 
+### Emergency (Break-Glass) Access
+
+Emergency access is:
+- Time-limited
+- Logged
+- Restricted to critical incidents
+
+All break-glass usage:
+- Requires justification
+- Is reviewed post-incident
+- Triggers credential rotation
+
+Emergency access is not a substitute for proper permissions.
+
+---
+
+### 14.1.3 Third-Party Access Policy
+
+Third-party access:
+- Is explicitly approved
+- Time-bound
+- Scope-limited
+- Logged and reviewed
+
+No persistent or shared third-party credentials are permitted.
+
 ---
 
 ## 14.2 Data Security & Privacy
@@ -107,6 +133,17 @@ Customer data is protected **throughout its lifecycle**.
     - Logs where applicable
 
 > No production customer data is copied to non-secure or personal environments.
+
+---
+
+### 14.2.3 Derived Data & Export Controls
+
+Exports and derived datasets:
+- Inherit the same access controls as source data
+- Are logged and auditable
+- Are subject to retention and deletion policies
+
+Untracked data exports are prohibited.
 
 ---
 
@@ -190,6 +227,15 @@ Approval is mandatory for:
 
 No anonymous changes are permitted.
 
+### Separation of Duties (SoD)
+
+No individual may:
+- Propose and approve the same change
+- Develop and deploy a model unilaterally
+- Activate and deactivate kill switches without review
+
+Approval workflows enforce separation of duties by design.
+
 ---
 
 ## 14.5 Summary
@@ -201,5 +247,25 @@ This governance framework ensures:
 - Full auditability of models and decisions
 - Clear ownership and accountability
 - Compliance with internal and external requirements
+
+### Compliance Alignment
+
+This governance framework is designed to support:
+- Data protection regulations (e.g., GDPR-style deletion rights)
+- Internal audit requirements
+- Model accountability and traceability standards
+
+Formal compliance mappings are maintained separately as requirements evolve.
+
+## Ethical Use & Misuse Escalation
+
+If a proposed use of the system:
+- Raises ethical concerns
+- Risks customer harm
+- Conflicts with stated purpose
+
+It must be escalated for review before implementation.
+
+Not all technically possible uses are permitted uses.
 
 > “If a system can make decisions, it must also be governable.”

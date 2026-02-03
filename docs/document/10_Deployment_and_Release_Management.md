@@ -37,6 +37,21 @@ Canary rules:
 - Thresholds for automatic rollback (e.g., error rate spike, negative KPI impact)
 - Manual approval required for full rollout
 
+### Canary Selection Strategy
+
+Canary cohorts are:
+- Representative across segments
+- Inclusive of high-risk and high-value customers
+- Stable across the canary period
+
+Biased or convenience sampling is explicitly avoided.
+
+### Canary Duration
+
+- Canary deployments have a fixed maximum duration
+- Extensions require explicit approval
+- Indefinite canary states are not allowed
+
 ---
 
 ### 10.1.3 Full Production Promotion
@@ -60,6 +75,43 @@ Promotion requires explicit approvals from:
 - Business stakeholders (optional for high-impact models)
 
 All approvals are **logged for audit purposes**.
+
+## Automated Promotion Gates
+
+Before human approval, models must pass automated checks:
+
+- No regression against baselines
+- Calibration within acceptable bounds
+- No critical segment failures
+- Latency and error rates within SLA
+
+Models failing automated gates cannot be promoted, regardless of approval.
+
+---
+
+### 10.1.5 Model Risk Classification
+
+Each model is assigned a risk tier that determines deployment rigor.
+
+### Risk Levels
+
+- **Low Risk**
+  - Informational outputs only
+  - No automated actions
+  - Canary optional
+
+- **Medium Risk**
+  - Advisory decisions
+  - Human-in-the-loop actions
+  - Canary required
+
+- **High Risk**
+  - Automated or customer-impacting decisions
+  - Financial or reputational impact
+  - Extended shadow period
+  - Mandatory business approval
+
+Risk classification is reviewed before every major promotion.
 
 ---
 
@@ -96,6 +148,15 @@ After rollback:
 - KPI recovery is verified
 - Segment-level performance rechecked
 - Full audit trail is logged
+
+### 10.2.4 Rollback Authority
+
+Rollback can be initiated by:
+- On-call ML engineer
+- Platform reliability owner
+
+No approval is required during active incidents.
+All rollbacks are reviewed post-incident.
 
 ---
 
@@ -142,6 +203,16 @@ All changes follow **structured governance**.
   - Compliance with internal policies
   - No unauthorized deployments
   - Lessons learned captured
+
+### Deployment Incidents
+
+Deployment-related issues are treated as incidents.
+
+- Severity is assessed
+- Incident records are created
+- Root-cause analysis is required for high-severity events
+
+Deployment failures feed into continuous improvement.
 
 ---
 

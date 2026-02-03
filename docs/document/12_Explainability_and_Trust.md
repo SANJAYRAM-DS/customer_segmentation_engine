@@ -20,6 +20,20 @@ Purpose:
 - Prevents blind trust in model scores
 - Facilitates **business validation**
 
+## Explanation Granularity Controls
+
+Explanation detail is tiered by consumer type:
+
+- Business users:
+  - Reason codes
+  - High-level drivers
+- Analysts:
+  - Aggregated feature impacts
+- ML engineers:
+  - Full explanation artifacts
+
+Raw explanation values are not exposed by default.
+
 ---
 
 ### 12.1.2 Customer Lifetime Value (CLV)
@@ -46,6 +60,18 @@ Purpose:
 Optional embeddings:
 - Visualized with dimensionality reduction (UMAP / t-SNE)
 - Highlights **behavioral similarity between customers**
+
+---
+
+### 12.1.4 Non-Causality Disclaimer
+
+All explanations provided by this system are **associative**, not causal.
+
+- Feature contributions explain model behavior, not customer intent
+- Explanations must not be interpreted as root causes
+- No counterfactual or causal guarantees are implied
+
+This system supports decision-making, not causal inference.
 
 ---
 
@@ -106,7 +132,34 @@ For each prediction:
   - Trend arrows for behavioral change
   - Top risk reason indicators
 
+## Explanation Feedback Loop
+
+Business users can flag explanations as:
+- Confusing
+- Implausible
+- Misaligned with observed behavior
+
+Flagged cases are reviewed by:
+- ML engineering
+- Feature owners
+
+Feedback informs feature design and explanation logic improvements.
+
 ---
+
+### 12.3.4 Explanation Stability Monitoring
+
+The system monitors:
+- Changes in top contributing features over time
+- Volatility in explanation rankings
+- Sudden shifts in dominant reason codes
+
+Excessive explanation instability triggers:
+- Feature review
+- Model reassessment
+- Communication to business stakeholders
+
+--
 
 ## 12.4 Summary
 
@@ -116,5 +169,14 @@ Explainability framework ensures:
 - Business users **trust model recommendations**
 - All predictions are **auditable historically**
 - Decisions can be justified to stakeholders and regulators
+
+## Prohibited Uses of Explanations
+
+Explanations must not be used for:
+- Individual-level punitive enforcement
+- Automated denial of service
+- Decisions requiring causal justification
+
+High-stakes decisions require human review and external validation.
 
 > “No prediction is magic — every score comes with a story.”
