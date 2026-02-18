@@ -40,11 +40,10 @@ app.add_middleware(
 )
 
 # ----------------------
-# Rate Limiting Middleware
+# Rate Limiting Middleware (disabled — uncomment to re-enable)
 # ----------------------
-from backend.api.middleware.rate_limiter import rate_limit_middleware
-
-app.middleware("http")(rate_limit_middleware)
+# from backend.api.middleware.rate_limiter import rate_limit_middleware
+# app.middleware("http")(rate_limit_middleware)
 
 # ----------------------
 # API Routes
