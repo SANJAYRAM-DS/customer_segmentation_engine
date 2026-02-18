@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 import os
-from fastapi import FastAPI
+import sys
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 # Load environment variables from .env
 load_dotenv()
@@ -21,10 +23,22 @@ from backend.api.routes import (
 app = FastAPI(title="Customer Intelligence API", version="1.0")
 
 # ----------------------
+# Global Exception Handler — returns JSON instead of plain-text 500
+# ----------------------
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": type(exc).__name__,
+            "detail": str(exc),
+            "path": str(request.url.path),
+        }
+    )
+
+# ----------------------
 # CORS Middleware (PRODUCTION-READY)
 # ----------------------
-# Get allowed origins from environment variable
-# Default to localhost for development
 allowed_origins = os.getenv(
     "CORS_ORIGINS",
     "http://localhost:3000,http://localhost:5173,http://localhost:8080"
@@ -32,11 +46,11 @@ allowed_origins = os.getenv(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,  # Restricted origins from environment
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "X-API-Key"],
-    max_age=3600,  # Cache preflight requests for 1 hour
+    max_age=3600,
 )
 
 # ----------------------
@@ -70,3 +84,42 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+# ----------------------
+# Debug Endpoint — exposes data loading status to diagnose Render 500s
+# ----------------------
+@app.get("/debug")
+def debug_info():
+    from pathlib import Path
+    from backend.caching.loader import loader, OUTPUTS_DIR, SNAPSHOTS_DIR
+
+    output_dirs = [d.name for d in OUTPUTS_DIR.glob("snapshot_date=*")] if OUTPUTS_DIR.exists() else []
+    snapshot_dirs = [d.name for d in SNAPSHOTS_DIR.glob("snapshot_date=*")] if SNAPSHOTS_DIR.exists() else []
+
+    snapshot_status = "not_loaded"
+    snapshot_cols = []
+    snapshot_rows = 0
+    error_msg = None
+    try:
+        df = loader.get_customer_snapshot()
+        snapshot_rows = len(df)
+        snapshot_cols = list(df.columns[:15])
+        snapshot_status = "ok" if not df.empty else "empty"
+    except Exception as e:
+        snapshot_status = "error"
+        error_msg = f"{type(e).__name__}: {str(e)}"
+
+    return {
+        "python_version": sys.version,
+        "outputs_dir": str(OUTPUTS_DIR),
+        "outputs_dir_exists": OUTPUTS_DIR.exists(),
+        "snapshots_dir": str(SNAPSHOTS_DIR),
+        "snapshots_dir_exists": SNAPSHOTS_DIR.exists(),
+        "output_dirs": output_dirs,
+        "snapshot_dirs": snapshot_dirs,
+        "loader_latest_date": loader._latest_snapshot_date,
+        "snapshot_status": snapshot_status,
+        "snapshot_rows": snapshot_rows,
+        "snapshot_cols_sample": snapshot_cols,
+        "error": error_msg,
+    }
