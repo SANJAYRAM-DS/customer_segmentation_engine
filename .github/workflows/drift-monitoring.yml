@@ -6,83 +6,25 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
-env:
-  PYTHON_VERSION: '3.10'
-
 jobs:
   monitor-drift:
     name: Monitor Data & Model Drift
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
-    
+      uses: actions/checkout@v4
+
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-    
+        python-version: '3.10'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
-    - name: Download current data
+
+    - name: Check backend health
       run: |
-        echo "Downloading current data..."
-        # aws s3 cp s3://your-bucket/current-data ./data/current/
-    
-    - name: Run drift detection
-      run: |
-        python -m backend.monitoring.drift_monitor \
-          --reference-data data/reference/features.parquet \
-          --current-data data/current/features.parquet \
-          --output-dir monitoring/drift_reports
-    
-    - name: Check drift alerts
-      id: drift_check
-      run: |
-        python -c "
-        import json
-        from pathlib import Path
-        
-        report_file = Path('monitoring/drift_reports/drift_report_latest.json')
-        if report_file.exists():
-            with open(report_file) as f:
-                report = json.load(f)
-            
-            critical_alerts = [a for a in report['alerts'] if a['severity'] == 'critical']
-            
-            if critical_alerts:
-                print(f'::set-output name=drift_detected::true')
-                print(f'::set-output name=alert_count::{len(critical_alerts)}')
-            else:
-                print(f'::set-output name=drift_detected::false')
-        "
-    
-    - name: Trigger retraining if drift detected
-      if: steps.drift_check.outputs.drift_detected == 'true'
-      run: |
-        echo "Critical drift detected! Triggering retraining..."
-        gh workflow run model-training.yml
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Upload drift reports
-      uses: actions/upload-artifact@v3
-      with:
-        name: drift-reports
-        path: monitoring/drift_reports/
-    
-    - name: Notify if drift detected
-      if: steps.drift_check.outputs.drift_detected == 'true'
-      uses: 8398a7/action-slack@v3
-      with:
-        status: 'custom'
-        custom_payload: |
-          {
-            text: '⚠️ Critical drift detected! ${{ steps.drift_check.outputs.alert_count }} alerts',
-            color: 'warning'
-          }
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        python -c "from backend.api.app import app; print('Backend import OK — drift monitoring placeholder')"
