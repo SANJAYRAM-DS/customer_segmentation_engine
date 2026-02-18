@@ -242,7 +242,7 @@ Marginal improvements without statistical support are treated as inconclusive.
 ### 7.4.3 No-Regression Policy
 
 A new model is rejected if:
-- It underperforms baseline in any critical segment
+- It underperforms baseline in any critical segmentz
 - Gains are limited to non-business-critical cohorts
 
 ---

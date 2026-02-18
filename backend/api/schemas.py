@@ -34,6 +34,7 @@ class SegmentationResponse(BaseModel):
 class CustomerListItem(BaseModel):
     customer_id: int
     segment_name: Optional[str]
+    health_score: Optional[float]  # Health score in 0-100 range
     health_band: Optional[str]
     churn_probability: Optional[float]
     clv_12m: Optional[float]

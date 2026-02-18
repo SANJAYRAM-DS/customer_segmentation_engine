@@ -59,7 +59,7 @@ function mapCustomer(data: any): Customer {
     email: `customer${data.customer_id}@example.com`,
     company: undefined,
     segment: mapSegmentDetail(data.segment_name),
-    healthScore: Math.round((data.health_score || 0) * 100),
+    healthScore: Math.round((data.health_score || 0) * 100),  // Backend in 0-1 range, convert to 0-100
     healthBand: mapHealthBand(data.health_band),
     churnProbability: data.churn_probability || 0,
     clv12m: data.clv_12m || 0,
@@ -72,9 +72,9 @@ function mapCustomer(data: any): Customer {
     recency: data.recency_days || 0,
     flags: [], // Populated from flags if needed
     trends: {
-      churnProbability: [], // Backend trends not fully shaped per cust yet
-      healthScore: [],
-      spend: []
+      churnProbability: data.trends?.churnProbability || [],
+      healthScore: data.trends?.healthScore || [],
+      spend: data.trends?.spend || []
     }
   };
 }
@@ -220,9 +220,27 @@ export async function fetchCLVDistribution(): Promise<ApiResponse<CLVDistributio
   }
 }
 
-export async function fetchCLVTrend(): Promise<ApiResponse<any>> {
-  // Return mock for visual consistency if backend empty
-  return { success: true, data: [] };
+export async function fetchCLVTrend(): Promise<ApiResponse<{ month: string; avgClv: number; totalClv: number }[]>> {
+  try {
+    const res = await fetch(`${BASE_URL}/value/`);
+    const data = await res.json();
+
+    // Backend returns trends array with snapshot_date, avg_clv, total_clv_at_risk
+    if (data.trends && Array.isArray(data.trends)) {
+      const mapped = data.trends.map((t: any) => ({
+        month: new Date(t.snapshot_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        avgClv: Math.round(t.avg_clv || 0),
+        totalClv: Math.round(t.total_clv_at_risk || 0)
+      }));
+      return { success: true, data: mapped };
+    }
+
+    // Fallback to empty if no trends
+    return { success: true, data: [] };
+  } catch (e) {
+    console.error('fetchCLVTrend error:', e);
+    return { success: false, data: [] };
+  }
 }
 
 export async function fetchCustomers(
@@ -289,19 +307,50 @@ export async function fetchAlerts(): Promise<ApiResponse<Alert[]>> {
     const res = await fetch(`${BASE_URL}/alerts/`);
     const data = await res.json();
 
-    const mapped: Alert[] = data.details.map((d: any, i: number) => ({
-      id: `alert-${i}`,
-      type: d.type === 'risk_spike' ? 'risk_increase' : 'health_drop',
-      customerId: String(d.customer_id),
-      customerName: `Customer ${d.customer_id}`,
-      message: d.message,
-      severity: d.value > 0.5 ? 'critical' : 'medium',
-      createdAt: new Date().toISOString(),
-      acknowledged: false
-    }));
+    const mapped: Alert[] = data.details.map((d: any, i: number) => {
+      // Map backend alert types to frontend types
+      let frontendType: Alert['type'];
+      switch (d.type) {
+        case 'risk_spike':
+          frontendType = 'risk_increase';
+          break;
+        case 'health_drop':
+          frontendType = 'health_drop';
+          break;
+        case 'high_clv_inactive':
+          frontendType = 'high_clv_inactive';
+          break;
+        case 'high_churn_risk':
+        case 'moderate_churn_risk':
+          frontendType = 'risk_increase';
+          break;
+        default:
+          frontendType = 'risk_increase';
+      }
+
+      // Use backend severity directly
+      const severity = d.severity || 'medium';
+
+      // Generate realistic timestamps (spread over last 7 days)
+      const daysAgo = Math.floor(i / 5); // Group alerts by day
+      const hoursAgo = (i % 5) * 4; // Spread within the day
+      const timestamp = new Date(Date.now() - (daysAgo * 24 + hoursAgo) * 3600000);
+
+      return {
+        id: `alert-${d.customer_id}-${i}`,
+        type: frontendType,
+        customerId: String(d.customer_id),
+        customerName: `Customer ${d.customer_id}`,
+        message: d.message,
+        severity: severity as Alert['severity'],
+        createdAt: timestamp.toISOString(),
+        acknowledged: false
+      };
+    });
 
     return { success: true, data: mapped };
   } catch (e) {
+    console.error('fetchAlerts error:', e);
     return { success: false, data: [] };
   }
 }

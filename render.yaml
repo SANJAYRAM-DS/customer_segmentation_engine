@@ -1,0 +1,79 @@
+# Render.com Deployment Configuration
+# This file enables one-click deployment to Render.com
+
+services:
+  # Main API Service
+  - type: web
+    name: customer-intelligence-api
+    env: python
+    region: oregon  # Change to your preferred region
+    plan: free  # Options: free, starter ($7/mo), standard ($25/mo)
+    
+    # Build settings
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.api.app:app --host 0.0.0.0 --port $PORT --workers 2
+    
+    # Health check
+    healthCheckPath: /health
+    
+    # Auto-deploy on git push
+    autoDeploy: true
+    
+    # Environment variables
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      
+      - key: APP_NAME
+        value: Customer Intelligence API
+      
+      - key: APP_VERSION
+        value: 1.0.0
+      
+      # IMPORTANT: Update this with your frontend URL
+      - key: CORS_ORIGINS
+        value: https://your-frontend-domain.com
+      
+      # Auto-generated secret (Render will generate this)
+      - key: SECRET_KEY
+        generateValue: true
+      
+      - key: LOG_LEVEL
+        value: INFO
+      
+      - key: LOG_FORMAT
+        value: json
+      
+      - key: WORKERS
+        value: 2
+      
+      - key: ENABLE_DOCS
+        value: false  # Disable Swagger docs in production
+      
+      - key: ENABLE_METRICS
+        value: true
+      
+      - key: ENABLE_RATE_LIMITING
+        value: true
+      
+      - key: RATE_LIMIT_PER_MINUTE
+        value: 60
+      
+      - key: RATE_LIMIT_PER_HOUR
+        value: 1000
+
+# Optional: Background worker for scheduled tasks
+# Uncomment if you need scheduled model training/inference
+#  - type: cron
+#    name: daily-inference
+#    env: python
+#    schedule: "0 2 * * *"  # Run at 2 AM UTC daily
+#    buildCommand: pip install -r backend/requirements.txt
+#    startCommand: python backend/orchestration/run_inference.py
+
+# Optional: Redis for caching (if needed)
+# Uncomment to add Redis
+#  - type: redis
+#    name: customer-intelligence-cache
+#    plan: free  # 25MB free tier
+#    maxmemoryPolicy: allkeys-lru

@@ -1,0 +1,131 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-inference-churn
+  namespace: ml-platform
+spec:
+  # Run daily at 2 AM UTC
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: customer-intelligence
+            component: batch-inference
+            model: churn
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: batch-inference
+            image: customer-intelligence-batch:latest
+            command: ["python", "-m", "backend.orchestration.batch_inference"]
+            args: ["--model-type", "churn"]
+            env:
+            - name: MODEL_TYPE
+              value: "churn"
+            envFrom:
+            - configMapRef:
+                name: batch-config
+            - secretRef:
+                name: batch-secrets
+            resources:
+              requests:
+                memory: "2Gi"
+                cpu: "1000m"
+              limits:
+                memory: "4Gi"
+                cpu: "2000m"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-inference-clv
+  namespace: ml-platform
+spec:
+  # Run daily at 3 AM UTC
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: customer-intelligence
+            component: batch-inference
+            model: clv
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: batch-inference
+            image: customer-intelligence-batch:latest
+            command: ["python", "-m", "backend.orchestration.batch_inference"]
+            args: ["--model-type", "clv"]
+            env:
+            - name: MODEL_TYPE
+              value: "clv"
+            envFrom:
+            - configMapRef:
+                name: batch-config
+            - secretRef:
+                name: batch-secrets
+            resources:
+              requests:
+                memory: "2Gi"
+                cpu: "1000m"
+              limits:
+                memory: "4Gi"
+                cpu: "2000m"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: model-training-weekly
+  namespace: ml-platform
+spec:
+  # Run weekly on Sunday at 1 AM UTC
+  schedule: "0 1 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: customer-intelligence
+            component: training
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: training
+            image: customer-intelligence-training:latest
+            command: ["python", "-m", "backend.orchestration.training_orchestrator"]
+            envFrom:
+            - configMapRef:
+                name: training-config
+            - secretRef:
+                name: training-secrets
+            resources:
+              requests:
+                memory: "4Gi"
+                cpu: "2000m"
+              limits:
+                memory: "8Gi"
+                cpu: "4000m"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000

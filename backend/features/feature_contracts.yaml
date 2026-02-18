@@ -1,0 +1,89 @@
+version: 1.0
+
+entities:
+  customer:
+    primary_key: customer_id
+    time_key: as_of_time
+
+feature_sets:
+
+  churn:
+    allowed_categories:
+      - behavioral
+      - transactional
+      - returns
+      - lifecycle
+      - derived_risk
+
+    forbidden_categories:
+      - pure_lifetime
+      - future_label
+
+    ttl_hours: 24
+    owner: churn-team
+
+    features:
+      sessions_30d:
+        category: behavioral
+        dtype: int
+        lookback_days: 30
+        nullable: false
+
+      spend_90d:
+        category: transactional
+        dtype: float
+        lookback_days: 90
+        nullable: false
+
+      recency_days:
+        category: lifecycle
+        dtype: int
+        nullable: false
+
+  clv:
+    allowed_categories:
+      - transactional
+      - lifecycle
+      - behavioral
+
+    forbidden_categories:
+      - short_term_only
+
+    ttl_hours: 168
+    owner: revenue-team
+
+    features:
+      spend_180d:
+        category: transactional
+        dtype: float
+        lookback_days: 180
+        nullable: false
+
+      tenure_days:
+        category: lifecycle
+        dtype: int
+        nullable: false
+
+  segmentation:
+    allowed_categories:
+      - lifecycle
+      - transactional
+      - channel
+
+    forbidden_categories:
+      - derived_risk
+      - future_label
+
+    ttl_hours: 720
+    owner: growth-team
+
+    features:
+      acquisition_channel:
+        category: channel
+        dtype: string
+        nullable: false
+
+      avg_order_value:
+        category: transactional
+        dtype: float
+        nullable: false

@@ -10,8 +10,9 @@ from backend.features.returns import aggregate_returns
 from backend.features.temporal import add_temporal_features
 from backend.features.targets import build_churn_target, build_clv_target
 from backend.features.snapshot import get_snapshot_date
+from backend.features.validation import FeatureValidator, save_validation_report
 from backend.data_ingestion import load_and_validate
-from backend.data.feature_registry.loader import load_feature_registry
+from backend.data.feature_registry.loader import load_feature_registry, get_feature_names
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -132,9 +133,9 @@ def build_customer_features(data):
         churn_df["churn_90d"] = build_churn_target(orders, snapshot)(churn_df)
 
         registry = load_feature_registry("churn", "v1")
-        expected = list(registry["features"].keys())
+        expected = get_feature_names(registry)
         churn_df = churn_df[expected]
-        validate_feature_schema(churn_df, registry)
+        validate_feature_schema(churn_df, registry, "churn")
 
         churn_dir = OUTPUT_DIR / "churn"
         churn_dir.mkdir(parents=True, exist_ok=True)
@@ -155,9 +156,9 @@ def build_customer_features(data):
         clv_df["future_90d_spend"] = clv_df["future_90d_spend"].fillna(0)
 
         registry = load_feature_registry("clv", "v1")
-        expected = list(registry["features"].keys())
+        expected = get_feature_names(registry)
         clv_df = clv_df[expected]
-        validate_feature_schema(clv_df, registry)
+        validate_feature_schema(clv_df, registry, "clv")
         
         clv_dir = OUTPUT_DIR / "clv"
         clv_dir.mkdir(parents=True, exist_ok=True)
@@ -174,17 +175,13 @@ def build_customer_features(data):
         # SEGMENTATION
         process_log.append({"step": "segmentation_features", "status": "started"})
         registry = load_feature_registry("segmentation", "v1")
-        expected = list(registry["features"].keys())
+        expected = get_feature_names(registry)
         seg_df = base[expected]
-        validate_feature_schema(base, registry)
+        validate_feature_schema(seg_df, registry, "segmentation")
 
         seg_dir = OUTPUT_DIR / "segmentation"
         seg_dir.mkdir(parents=True, exist_ok=True)
-        base.to_parquet(seg_dir / "features.parquet", index=False)
-
-        seg_dir = OUTPUT_DIR / "segmentation"
-        seg_dir.mkdir(parents=True, exist_ok=True)
-        base.to_parquet(seg_dir / "features.parquet", index=False)
+        seg_df.to_parquet(seg_dir / "features.parquet", index=False)
 
         process_log.append(
             {
@@ -223,15 +220,36 @@ def build_customer_features(data):
 
         raise
 
-def validate_feature_schema(df, registry: dict):
-    expected = set(registry["features"].keys())
-    actual = set(df.columns)
+def validate_feature_schema(df, registry: dict, model_type: str):
+    """
+    Comprehensive feature validation using FeatureValidator
+    
+    Args:
+        df: Feature dataframe
+        registry: Feature registry dict
+        model_type: Model type for category eligibility check
+    """
+    validator = FeatureValidator(registry, max_null_rate=0.5)
+    report = validator.validate_all(df, model_type=model_type)
+    
+    # Save validation report
+    report_dir = OUTPUT_DIR / model_type / "validation"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    save_validation_report(report, report_dir / "validation_report.json")
+    
+    # Raise error if validation failed
+    if not report["passed"]:
+        errors = []
+        for check_name, check_result in report["checks"].items():
+            if not check_result["passed"]:
+                errors.extend(check_result.get("errors", []))
+                errors.extend(check_result.get("warnings", []))
+        
+        error_msg = f"Feature validation failed:\n" + "\n".join(f"  - {e}" for e in errors)
+        raise RuntimeError(error_msg)
+    
+    print(f"[OK] Feature validation passed for {model_type}")
 
-    missing = expected - actual
-    extra = actual - expected
-
-    if missing:
-        raise RuntimeError(f"Missing features: {missing}")
 
 
 if __name__ == "__main__":

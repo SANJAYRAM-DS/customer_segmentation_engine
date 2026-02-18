@@ -22,7 +22,7 @@ from sklearn.metrics import (
 
 from backend.data.feature_registry.loader import load_feature_registry
 from backend.models.champion_manager import load_champion, promote_champion
-from backend.models.promotion_policy import better_segmentation
+from backend.models.promotion import PromotionPolicy
 from backend.orchestration.baseline_stats import save_baseline_stats
 
 
@@ -177,14 +177,20 @@ def main():
     # 🏆 CHAMPION LOGIC
     # --------------------------------------------------
     current = load_champion(MODEL_REGISTRY)
+    
+    policy = PromotionPolicy(
+        min_improvement=0.01,  # 1% minimum improvement
+        max_secondary_regression=0.05,  # 5% max regression on secondary metrics
+    )
 
-    if current is None or better_segmentation(metrics, current["metrics"]):
+    if current is None:
+        # No existing champion, promote automatically
         promote_champion(
             model_dir=MODEL_REGISTRY,
             model_name=MODEL_NAME,
             version=version,
             metrics=metrics,
-            reason="Auto-promotion: better silhouette score",
+            reason="Initial champion model",
         )
 
         save_baseline_stats(
@@ -192,10 +198,31 @@ def main():
             MODEL_REGISTRY / "baseline_stats.json",
         )
 
-        print("[CHAMPION] New segmentation champion promoted")
-
+        print("[CHAMPION] Initial segmentation champion promoted")
     else:
-        print("[CHALLENGER] Segmentation model not promoted")
+        # Use enhanced promotion policy
+        should_promote, reason = policy.evaluate_segmentation_promotion(
+            challenger_metrics=metrics,
+            champion_metrics=current["metrics"],
+        )
+        
+        if should_promote:
+            promote_champion(
+                model_dir=MODEL_REGISTRY,
+                model_name=MODEL_NAME,
+                version=version,
+                metrics=metrics,
+                reason=reason,
+            )
+
+            save_baseline_stats(
+                df[SEG_FEATURES],
+                MODEL_REGISTRY / "baseline_stats.json",
+            )
+
+            print(f"[CHAMPION] {reason}")
+        else:
+            print(f"[CHALLENGER] {reason}")
 
     print("\n[PROFILE]\n", profile)
 

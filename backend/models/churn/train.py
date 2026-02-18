@@ -17,7 +17,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 from backend.data.feature_registry.loader import load_feature_registry
 from backend.models.utils import safe_log1p
 from backend.models.champion_manager import load_champion, promote_champion
-from backend.models.promotion_policy import better_churn
+from backend.models.promotion import PromotionPolicy
 from backend.orchestration.baseline_stats import save_baseline_stats
 
 
@@ -180,15 +180,39 @@ def main():
 
     # CHAMPION–CHALLENGER DECISION
     current = load_champion(REGISTRY_DIR)
+    
+    policy = PromotionPolicy(
+        min_improvement=0.01,  # 1% minimum improvement
+        max_secondary_regression=0.05,  # 5% max regression on secondary metrics
+    )
 
-    if current is None or better_churn(metrics["future"], current["metrics"]):
+    if current is None:
+        # No existing champion, promote automatically
         promote_champion(
             model_dir=REGISTRY_DIR,
             model_name="churn",
             version=version,
             metrics=metrics["future"],
-            reason="Auto-promotion: better PR-AUC",
+            reason="Initial champion model",
         )
+    else:
+        # Use enhanced promotion policy
+        should_promote, reason = policy.evaluate_churn_promotion(
+            challenger_metrics=metrics["future"],
+            champion_metrics=current["metrics"],
+        )
+        
+        if should_promote:
+            promote_champion(
+                model_dir=REGISTRY_DIR,
+                model_name="churn",
+                version=version,
+                metrics=metrics["future"],
+                reason=reason,
+            )
+            print(f"[PROMOTED] {reason}")
+        else:
+            print(f"[NOT PROMOTED] {reason}")
     baseline_path = (
     REGISTRY_DIR / "baseline_stats.json"
     )

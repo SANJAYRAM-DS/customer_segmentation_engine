@@ -21,15 +21,30 @@ from backend.api.routes import (
 app = FastAPI(title="Customer Intelligence API", version="1.0")
 
 # ----------------------
-# CORS Middleware
+# CORS Middleware (PRODUCTION-READY)
 # ----------------------
+# Get allowed origins from environment variable
+# Default to localhost for development
+allowed_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:3000,http://localhost:5173,http://localhost:8080"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
+    allow_origins=allowed_origins,  # Restricted origins from environment
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-API-Key"],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
+
+# ----------------------
+# Rate Limiting Middleware
+# ----------------------
+from backend.api.middleware.rate_limiter import rate_limit_middleware
+
+app.middleware("http")(rate_limit_middleware)
 
 # ----------------------
 # API Routes

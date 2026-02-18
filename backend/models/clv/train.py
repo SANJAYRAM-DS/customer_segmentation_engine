@@ -1,5 +1,3 @@
-# backend/models/clv/train.py
-
 from pathlib import Path
 import json
 import hashlib
@@ -21,7 +19,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, r
 from backend.data.feature_registry.loader import load_feature_registry
 from backend.models.utils import safe_log1p_with_caps
 from backend.models.champion_manager import load_champion, promote_champion
-from backend.models.promotion_policy import better_clv
+from backend.models.promotion import PromotionPolicy
 from backend.orchestration.baseline_stats import save_baseline_stats
 
 
@@ -264,14 +262,20 @@ def main():
     # 🏆 CHAMPION LOGIC
     # --------------------------------------------------
     current = load_champion(MODEL_REGISTRY)
+    
+    policy = PromotionPolicy(
+        min_improvement=0.01,  # 1% minimum improvement
+        max_secondary_regression=0.05,  # 5% max regression on secondary metrics
+    )
 
-    if current is None or better_clv(metrics, current["metrics"]):
+    if current is None:
+        # No existing champion, promote automatically
         promote_champion(
             model_dir=MODEL_REGISTRY,
             model_name=MODEL_NAME,
             version=version,
             metrics=metrics,
-            reason="Auto-promotion: better CLV RMSE/MAE",
+            reason="Initial champion model",
         )
 
         # Baseline stats (TRAIN FEATURES ONLY)
@@ -280,10 +284,32 @@ def main():
             MODEL_REGISTRY / "baseline_stats.json",
         )
 
-        print("[CHAMPION] New CLV champion promoted")
-
+        print("[CHAMPION] Initial CLV champion promoted")
     else:
-        print("[CHALLENGER] CLV model not promoted")
+        # Use enhanced promotion policy
+        should_promote, reason = policy.evaluate_clv_promotion(
+            challenger_metrics=metrics["clv"],
+            champion_metrics=current["metrics"].get("clv", current["metrics"]),
+        )
+        
+        if should_promote:
+            promote_champion(
+                model_dir=MODEL_REGISTRY,
+                model_name=MODEL_NAME,
+                version=version,
+                metrics=metrics,
+                reason=reason,
+            )
+
+            # Baseline stats (TRAIN FEATURES ONLY)
+            save_baseline_stats(
+                df.drop(columns=[TARGET]),
+                MODEL_REGISTRY / "baseline_stats.json",
+            )
+
+            print(f"[CHAMPION] {reason}")
+        else:
+            print(f"[CHALLENGER] {reason}")
 
 
 

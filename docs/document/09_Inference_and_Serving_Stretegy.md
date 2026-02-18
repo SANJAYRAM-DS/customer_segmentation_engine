@@ -127,7 +127,7 @@ SLAs are enforced, not informational.
 
 ---
 
-## 9.2 Real-Time Inference (If Applicable)
+## 9.2 Real-Time Inference (If Applicable - not for this system)
 
 Real-time inference is **optional** and used only when:
 - Immediate decisions are required

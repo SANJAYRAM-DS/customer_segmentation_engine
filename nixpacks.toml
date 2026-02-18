@@ -1,0 +1,13 @@
+# Nixpacks configuration for Railway deployment
+
+[phases.setup]
+nixPkgs = ["python310", "gcc", "g++"]
+
+[phases.install]
+cmds = [
+  "pip install --upgrade pip",
+  "pip install -r backend/requirements.txt"
+]
+
+[start]
+cmd = "uvicorn backend.api.app:app --host 0.0.0.0 --port $PORT --workers 2"

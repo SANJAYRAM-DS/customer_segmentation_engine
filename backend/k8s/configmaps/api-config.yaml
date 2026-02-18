@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: ml-platform
+data:
+  # Application settings
+  APP_NAME: "Customer Intelligence API"
+  APP_VERSION: "1.0.0"
+  
+  # Environment
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  
+  # API settings
+  API_HOST: "0.0.0.0"
+  API_PORT: "8000"
+  API_WORKERS: "4"
+  
+  # CORS settings (PRODUCTION - RESTRICTED)
+  CORS_ORIGINS: "https://yourdomain.com,https://app.yourdomain.com"
+  
+  # Feature store
+  FEATURE_REGISTRY_PATH: "/app/backend/data/feature_registry"
+  
+  # Model registry
+  MODEL_REGISTRY_PATH: "/app/backend/models/model_registry"
+  
+  # Data paths
+  DATA_DIR: "/app/data"
+  SNAPSHOT_DIR: "/app/data/snapshots"
+  OUTPUTS_DIR: "/app/data/outputs"
+  
+  # Monitoring
+  ENABLE_METRICS: "true"
+  METRICS_PORT: "9090"
+  
+  # Kill switches
+  KILL_SWITCH_CONFIG: "/app/config/kill_switches.json"
+  
+  # Audit logging
+  AUDIT_LOG_DIR: "/app/logs/audit"
