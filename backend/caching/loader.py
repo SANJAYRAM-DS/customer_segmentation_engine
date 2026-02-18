@@ -16,13 +16,19 @@ class DataLoader:
 
     def _refresh_latest_date(self):
         """Find the latest available output snapshot."""
-        if not OUTPUTS_DIR.exists():
-            return
-
-        # Look for snapshot_date=YYYY-MM-DD directories
-        dirs = sorted(OUTPUTS_DIR.glob("snapshot_date=*"))
-        if dirs:
-            self._latest_snapshot_date = dirs[-1].name.split("=")[1]
+        # Try outputs dir first
+        if OUTPUTS_DIR.exists():
+            dirs = sorted(OUTPUTS_DIR.glob("snapshot_date=*"))
+            if dirs:
+                self._latest_snapshot_date = dirs[-1].name.split("=")[1]
+                return
+        # Fallback: try snapshots dir (strip time component if present)
+        if SNAPSHOTS_DIR.exists():
+            dirs = sorted(SNAPSHOTS_DIR.glob("snapshot_date=*"))
+            if dirs:
+                raw = dirs[-1].name.split("=")[1]
+                # Normalize: strip time part (e.g. '2023-04-24T00-00-00' -> '2023-04-24')
+                self._latest_snapshot_date = raw[:10]
 
     @property
     def latest_date(self) -> str:
@@ -69,17 +75,21 @@ class DataLoader:
     def get_customer_snapshot(self) -> pd.DataFrame:
         """
         Loads the full customer snapshot. Cached in memory for speed.
-        WARNING: In production with millions of rows, use a DB or limit cols.
+        Tries both 'YYYY-MM-DD' and 'YYYY-MM-DDTHH-MM-SS' folder name formats.
         """
         if not self.latest_date:
             return pd.DataFrame()
-            
-        path = SNAPSHOTS_DIR / f"snapshot_date={self.latest_date}" / "customer_snapshot.parquet"
-        if not path.exists():
-             return pd.DataFrame()
-        
 
-        return pd.read_parquet(path)
+        # Try exact date match first, then with time suffix
+        candidates = [
+            SNAPSHOTS_DIR / f"snapshot_date={self.latest_date}" / "customer_snapshot.parquet",
+            SNAPSHOTS_DIR / f"snapshot_date={self.latest_date}T00-00-00" / "customer_snapshot.parquet",
+        ]
+        for path in candidates:
+            if path.exists():
+                return pd.read_parquet(path)
+
+        return pd.DataFrame()
     def get_customer_details(self, customer_id: int) -> dict:
         df = self.get_customer_snapshot()
         df = self.sanitize_df(df) # SANITIZE HERE
