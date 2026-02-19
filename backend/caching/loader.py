@@ -15,19 +15,21 @@ class DataLoader:
         self._refresh_latest_date()
 
     def _refresh_latest_date(self):
-        """Find the latest available output snapshot."""
+        """Find the latest available output snapshot. Always normalizes to YYYY-MM-DD."""
         # Try outputs dir first
         if OUTPUTS_DIR.exists():
             dirs = sorted(OUTPUTS_DIR.glob("snapshot_date=*"))
             if dirs:
-                self._latest_snapshot_date = dirs[-1].name.split("=")[1]
+                raw = dirs[-1].name.split("=")[1]
+                # Normalize: strip time part (e.g. '2023-04-24T00-00-00' -> '2023-04-24')
+                self._latest_snapshot_date = raw[:10]
                 return
-        # Fallback: try snapshots dir (strip time component if present)
+        # Fallback: try snapshots dir
         if SNAPSHOTS_DIR.exists():
             dirs = sorted(SNAPSHOTS_DIR.glob("snapshot_date=*"))
             if dirs:
                 raw = dirs[-1].name.split("=")[1]
-                # Normalize: strip time part (e.g. '2023-04-24T00-00-00' -> '2023-04-24')
+                # Normalize: strip time part
                 self._latest_snapshot_date = raw[:10]
 
     @property
@@ -44,8 +46,18 @@ class DataLoader:
         return df.fillna(0)  # Or None if you prefer nulls in JSON
 
     def _get_output_path(self, filename: str) -> Path:
+        """Try YYYY-MM-DD folder first, then YYYY-MM-DDTHH-MM-SS fallback."""
         if not self.latest_date:
             raise FileNotFoundError("No output snapshots found.")
+        # Try plain date first, then with time suffix (T00-00-00)
+        candidates = [
+            OUTPUTS_DIR / f"snapshot_date={self.latest_date}" / filename,
+            OUTPUTS_DIR / f"snapshot_date={self.latest_date}T00-00-00" / filename,
+        ]
+        for path in candidates:
+            if path.exists():
+                return path
+        # Return the plain-date path so callers can handle missing files gracefully
         return OUTPUTS_DIR / f"snapshot_date={self.latest_date}" / filename
 
     def get_kpis(self) -> dict:
