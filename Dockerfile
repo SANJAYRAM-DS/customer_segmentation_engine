@@ -20,6 +20,16 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # This includes your models and parquet files!
 COPY --chown=user backend/ ./backend/
 
+# IMPORTANT for Hugging Face Docker Spaces:
+# The `COPY` above only copies the Git LFS pointer files (small text files).
+# We must use huggingface-cli to download the actual large binary files.
+RUN pip install huggingface_hub
+RUN huggingface-cli download Sanjayramdata/customersegmentation \
+    --repo-type space \
+    --local-dir /app \
+    --local-dir-use-symlinks False \
+    --include "*.parquet" "*.joblib"
+
 # Hugging Face Spaces MUST run on port 7860
 EXPOSE 7860
 
