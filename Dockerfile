@@ -24,7 +24,7 @@ COPY --chown=user backend/ ./backend/
 # The `COPY` above only copies the Git LFS pointer files (small text files).
 # We must use huggingface-cli to download the actual large binary files.
 RUN pip install huggingface_hub
-RUN huggingface-cli download Sanjayramdata/customersegmentation \
+RUN python -m huggingface_hub.cli.cli download Sanjayramdata/customersegmentation \
     --repo-type space \
     --local-dir /app \
     --local-dir-use-symlinks False \
