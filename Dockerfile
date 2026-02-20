@@ -24,11 +24,7 @@ COPY --chown=user backend/ ./backend/
 # The `COPY` above only copies the Git LFS pointer files (small text files).
 # We must use huggingface-cli to download the actual large binary files.
 RUN pip install huggingface_hub
-RUN python -m huggingface_hub.cli.cli download Sanjayramdata/customersegmentation \
-    --repo-type space \
-    --local-dir /app \
-    --local-dir-use-symlinks False \
-    --include "*.parquet" "*.joblib"
+RUN python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Sanjayramdata/customersegmentation', repo_type='space', local_dir='/app', allow_patterns=['*.parquet', '*.joblib'], local_dir_use_symlinks=False)"
 
 # Hugging Face Spaces MUST run on port 7860
 EXPOSE 7860
