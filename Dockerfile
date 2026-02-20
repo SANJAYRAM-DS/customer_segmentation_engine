@@ -21,8 +21,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY --chown=user backend/ ./backend/
 
 # IMPORTANT for Hugging Face Docker Spaces:
-# The `COPY` above only copies the Git LFS pointer files (small text files).
 # We must use huggingface-cli to download the actual large binary files.
+# First, we delete the LFS pointer files that were copied over so they don't block the download
+RUN find backend/ -type f \( -name "*.parquet" -o -name "*.joblib" \) -delete
 RUN pip install huggingface_hub
 RUN python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Sanjayramdata/customersegmentation', repo_type='space', local_dir='/app', allow_patterns=['*.parquet', '*.joblib'], local_dir_use_symlinks=False)"
 

@@ -104,6 +104,11 @@ def debug_info():
     snapshot_cols = []
     snapshot_rows = 0
     error_msg = None
+    file_info = {}
+    if SNAPSHOTS_DIR.exists():
+        for p in SNAPSHOTS_DIR.rglob("*.parquet"):
+            file_info[str(p.relative_to(SNAPSHOTS_DIR))] = p.stat().st_size
+
     try:
         df = loader.get_customer_snapshot()
         snapshot_rows = len(df)
@@ -121,6 +126,7 @@ def debug_info():
         "snapshots_dir_exists": SNAPSHOTS_DIR.exists(),
         "output_dirs": output_dirs,
         "snapshot_dirs": snapshot_dirs,
+        "file_sizes": file_info,
         "loader_latest_date": loader._latest_snapshot_date,
         "snapshot_status": snapshot_status,
         "snapshot_rows": snapshot_rows,
