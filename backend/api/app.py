@@ -39,29 +39,34 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ----------------------
 # CORS Middleware (PRODUCTION-READY)
 # ----------------------
-allowed_origins = os.getenv(
+allowed_origins_raw = os.getenv(
     "CORS_ORIGINS",
     "http://localhost:3000,http://localhost:5173,http://localhost:8080"
-).split(",")
+)
+allowed_origins = [o.strip() for o in allowed_origins_raw.split(",") if o.strip()]
 
-# Fallback for wildcard if no specific origins are defined in .env
-if "*" not in allowed_origins:
-    allowed_origins.append("*")
+# In development, also allow wildcard if env says so
+if os.getenv("ENABLE_CORS_ALL", "false").lower() == "true":
+    allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False, # Must be False if origins = ["*"]
+    allow_origins=allowed_origins,
+    allow_credentials=False,  # Must be False if origins include "*"
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
     max_age=3600,
 )
 
 # ----------------------
-# Rate Limiting Middleware (disabled — uncomment to re-enable)
+# Rate Limiting Middleware
 # ----------------------
-# from backend.api.middleware.rate_limiter import rate_limit_middleware
-# app.middleware("http")(rate_limit_middleware)
+if os.getenv("ENABLE_RATE_LIMITING", "true").lower() == "true":
+    try:
+        from backend.api.middleware.rate_limiter import rate_limit_middleware
+        app.middleware("http")(rate_limit_middleware)
+    except ImportError:
+        pass  # Rate limiter optional dependency not installed
 
 # ----------------------
 # API Routes

@@ -7,6 +7,7 @@ import {
   DollarSign,
   TrendingDown,
   Activity,
+  Download,
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { KPICard } from '../components/dashboard/KPICard';
@@ -15,6 +16,7 @@ import { SegmentDonutChart } from '../components/charts/SegmentDonutChart';
 import { HealthDistributionChart } from '../components/charts/HealthDistributionChart';
 import { DataTable } from '../components/dashboard/DataTable';
 import { StatusBadge, PriorityBadge } from '../components/dashboard/StatusBadge';
+import { Button } from '../components/ui/button';
 import {
   fetchKPISummary,
   fetchSegmentDistribution,
@@ -78,10 +80,10 @@ export default function ExecutiveOverview() {
     async function loadData() {
       setLoading(true);
       const [kpiRes, segmentRes, healthRes, atRiskRes] = await Promise.all([
-        fetchKPISummary(filters),
-        fetchSegmentDistribution(filters),
-        fetchHealthDistribution(filters),
-        fetchHighValueAtRisk(), // Assume this doesn't need filters or is critical list
+        fetchKPISummary(),
+        fetchSegmentDistribution(),
+        fetchHealthDistribution(),
+        fetchHighValueAtRisk(),
       ]);
 
       if (kpiRes.success) setKpi(kpiRes.data);
@@ -120,6 +122,22 @@ export default function ExecutiveOverview() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Page Header with Export */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Executive Overview</h1>
+            <p className="text-muted-foreground text-sm mt-1">Customer intelligence summary across all segments</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/export/pdf`, '_blank')}
+          >
+            <Download className="h-4 w-4" />
+            Download Report
+          </Button>
+        </div>
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           <KPICard

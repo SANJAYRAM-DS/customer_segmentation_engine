@@ -49,10 +49,9 @@ const atRiskColumns: ColumnDef<Customer>[] = [
         <div className="flex items-center gap-2">
           <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full ${
-                risk > 0.75 ? 'bg-danger' : risk > 0.5 ? 'bg-warning' : 'bg-success'
-              }`}
-              style={{ width: `${risk * 100}%` }}
+              className={`h-full ${risk > 0.75 ? 'bg-danger' : risk > 0.5 ? 'bg-warning' : 'bg-success'
+                }`}
+              style={{ width: `${Math.min(risk * 100, 100)}%` }}
             />
           </div>
           <span className="text-sm font-medium">{Math.round(risk * 100)}%</span>

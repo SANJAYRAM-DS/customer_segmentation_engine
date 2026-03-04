@@ -10,7 +10,7 @@ import { StatusBadge, PriorityBadge } from '../components/dashboard/StatusBadge'
 import {
   fetchHealthDistribution,
   fetchPriorityMatrix,
-  fetchCustomers,
+  fetchActionableCustomers,
   fetchKPISummary,
 } from '../lib/api';
 import type { HealthDistribution, Customer, KPISummary } from '../lib/types';
@@ -64,8 +64,8 @@ const customerColumns: ColumnDef<Customer>[] = [
           row.original.churnProbability > 0.5
             ? 'text-danger font-medium'
             : row.original.churnProbability > 0.25
-            ? 'text-warning font-medium'
-            : 'text-success font-medium'
+              ? 'text-warning font-medium'
+              : 'text-success font-medium'
         }
       >
         {Math.round(row.original.churnProbability * 100)}%
@@ -89,16 +89,16 @@ export default function CustomerHealth() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const [healthRes, matrixRes, customersRes, kpiRes] = await Promise.all([
+      const [healthRes, matrixRes, actionableRes, kpiRes] = await Promise.all([
         fetchHealthDistribution(),
         fetchPriorityMatrix(),
-        fetchCustomers({}, { pageSize: 50 }),
+        fetchActionableCustomers(50),
         fetchKPISummary(),
       ]);
 
       if (healthRes.success) setHealthData(healthRes.data);
       if (matrixRes.success) setMatrixData(matrixRes.data);
-      if (customersRes.success) setCustomers(customersRes.data);
+      if (actionableRes.success) setCustomers(actionableRes.data);
       if (kpiRes.success) setKPI(kpiRes.data);
       setLoading(false);
     }

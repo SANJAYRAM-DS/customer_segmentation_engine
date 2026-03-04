@@ -1,8 +1,14 @@
 from fastapi import APIRouter
 from backend.caching.loader import loader
 from backend.api.schemas import AlertsResponse
+import os
 
 router = APIRouter()
+
+CHURN_THRESHOLD = float(os.getenv("DEFAULT_CHURN_THRESHOLD", "0.7"))
+
+# In-memory store for acknowledged alerts (replace with DB in production)
+_acknowledged_alerts: set = set()
 
 @router.get("/", response_model=AlertsResponse)
 def get_alerts():
@@ -23,12 +29,10 @@ def get_alerts():
     high_val_risk = df[(df["clv_12m"] > df["clv_12m"].quantile(0.8)) & (df["is_active_30d"] == False)]
 
     # 4. Immediate High Risk (Absolute)
-    # Ensure we show something even if deltas are 0 (first run)
-    high_risk_absolute = df[df["churn_probability"] > 0.8]
+    high_risk_absolute = df[df["churn_probability"] > CHURN_THRESHOLD]
 
-    # 5. Moderate Risk (High Priority but not Critical)
-    # E.g. Risk > 0.5 but < 0.8
-    moderate_risk = df[(df["churn_probability"] > 0.5) & (df["churn_probability"] <= 0.8)]
+    # 5. Moderate Risk
+    moderate_risk = df[(df["churn_probability"] > 0.5) & (df["churn_probability"] <= CHURN_THRESHOLD)]
     
     print(f"[ALERTS] High Risk Absolute: {len(high_risk_absolute)}, Moderate: {len(moderate_risk)}, Risk Spike: {len(risk_spike)}, Health Drop: {len(health_drop)}, High Val Risk: {len(high_val_risk)}")
 
@@ -85,4 +89,35 @@ def get_alerts():
         "dropped_health": len(health_drop),
         "high_value_risk": len(high_val_risk),
         "details": alerts_list
+    }
+
+
+@router.post("/acknowledge/{alert_id}")
+def acknowledge_alert(alert_id: str):
+    """
+    Acknowledge an alert by its ID.
+    In production, persist this to a database.
+    """
+    _acknowledged_alerts.add(alert_id)
+    return {"success": True, "alert_id": alert_id, "acknowledged": True}
+
+
+@router.get("/summary")
+def get_alert_summary():
+    """Return high-level alert counts for badge/notification display."""
+    df = loader.get_customer_snapshot()
+    if df.empty:
+        return {"total": 0, "critical": 0, "high": 0, "medium": 0}
+
+    df = loader.sanitize_df(df)
+
+    critical = int((df["churn_probability"] > CHURN_THRESHOLD).sum())
+    high = int(((df["churn_probability"] > 0.5) & (df["churn_probability"] <= CHURN_THRESHOLD)).sum())
+    medium = int((df.get("health_score_delta_30d", 0) < -0.3).sum()) if "health_score_delta_30d" in df else 0
+
+    return {
+        "total": critical + high + medium,
+        "critical": critical,
+        "high": high,
+        "medium": medium
     }

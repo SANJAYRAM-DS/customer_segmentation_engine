@@ -32,13 +32,10 @@ function mapSegmentDetail(backendName: string): SegmentType {
 }
 
 function mapHealthBand(backendBand: string): HealthBand {
-  // Backend: "low", "medium", "high" -> mapped to Health Score usually?
-  // checking backend/snapshot/health.py: labels=["low", "medium", "high"]
-  // Frontend: 'Excellent' | 'Good' | 'Watch' | 'Critical'
   const lower = backendBand?.toLowerCase() || '';
-  if (lower === 'high') return 'Excellent';
-  if (lower === 'medium') return 'Good';
-  if (lower === 'low') return 'Critical';
+  if (lower === 'high' || lower === 'excellent') return 'Excellent';
+  if (lower === 'medium' || lower === 'good') return 'Good';
+  if (lower === 'low' || lower === 'critical') return 'Critical';
   return 'Watch';
 }
 
@@ -59,7 +56,7 @@ function mapCustomer(data: any): Customer {
     email: `customer${data.customer_id}@example.com`,
     company: undefined,
     segment: mapSegmentDetail(data.segment_name),
-    healthScore: Math.round((data.health_score || 0) * 100),  // Backend in 0-1 range, convert to 0-100
+    healthScore: Math.round(data.health_score || 0),  // Backend in 0-100 range
     healthBand: mapHealthBand(data.health_band),
     churnProbability: data.churn_probability || 0,
     clv12m: data.clv_12m || 0,
@@ -130,8 +127,8 @@ export async function fetchSegmentDistribution(): Promise<ApiResponse<SegmentDis
       segment: mapSegmentDetail(s.segment_name),
       count: s.customer_count,
       percentage: 0, // Calc below
-      avgClv: s.avg_clv,
-      avgChurnRisk: s.avg_churn_risk
+      avgClv: Math.round(s.avg_clv),
+      avgChurnRisk: Math.round(s.avg_churn_risk * 100)
     }));
 
     // Recalc percentages
@@ -160,6 +157,9 @@ export async function fetchHealthDistribution(): Promise<ApiResponse<HealthDistr
     const total = mapped.reduce((sum: number, s: any) => sum + s.count, 0);
     mapped.forEach((s: any) => s.percentage = Math.round((s.count / total) * 100));
 
+    const order = { Excellent: 4, Good: 3, Watch: 2, Critical: 1 };
+    mapped.sort((a, b) => (order[a.band as keyof typeof order] || 0) - (order[b.band as keyof typeof order] || 0));
+
     return { success: true, data: mapped };
   } catch (e) {
     return { success: false, data: [] };
@@ -180,6 +180,9 @@ export async function fetchChurnRiskDistribution(): Promise<ApiResponse<ChurnRis
     const total = mapped.reduce((sum: number, d: any) => sum + d.count, 0);
     mapped.forEach((d: any) => d.percentage = Math.round((d.count / total) * 100));
 
+    const indexOrder = { Low: 1, Medium: 2, High: 3, Critical: 4 };
+    mapped.sort((a, b) => (indexOrder[a.range as keyof typeof indexOrder] || 0) - (indexOrder[b.range as keyof typeof indexOrder] || 0));
+
     return { success: true, data: mapped };
   } catch (e) {
     return { success: false, data: [] };
@@ -187,15 +190,20 @@ export async function fetchChurnRiskDistribution(): Promise<ApiResponse<ChurnRis
 }
 
 export async function fetchRiskTrend(days: number = 30): Promise<ApiResponse<RiskTrend[]>> {
-  // Mocking trend for now as backend trend aggregation logic is minimal
-  return {
-    success: true,
-    data: Array.from({ length: 14 }, (_, i) => ({
-      date: new Date(Date.now() - (14 - i) * 86400000).toISOString().split('T')[0],
-      avgChurnProbability: 0.2 + Math.random() * 0.05,
-      highRiskPercentage: 15 + Math.random() * 5
-    }))
-  };
+  try {
+    const res = await fetch(`${BASE_URL}/risk/trend?days=${days}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const mapped: RiskTrend[] = (data.trend || []).map((t: any) => ({
+      date: t.date,
+      avgChurnProbability: t.avg_churn_probability,
+      highRiskPercentage: t.high_risk_percentage,
+    }));
+    return { success: true, data: mapped };
+  } catch (e) {
+    console.error('fetchRiskTrend error:', e);
+    return { success: false, data: [] };
+  }
 }
 
 export async function fetchCLVDistribution(): Promise<ApiResponse<CLVDistribution[]>> {
@@ -243,6 +251,18 @@ export async function fetchCLVTrend(): Promise<ApiResponse<{ month: string; avgC
   }
 }
 
+// Reverse map frontend segment name to backend segment name for filtering
+function reverseMapSegment(frontendSegment: string): string {
+  const map: Record<string, string> = {
+    'Loyal': 'Loyal Customer',
+    'Active': 'Power User',
+    'At-Risk': 'At Risk',
+    'Churned': 'Hibernating',
+    'New': 'New',
+  };
+  return map[frontendSegment] || frontendSegment;
+}
+
 export async function fetchCustomers(
   filters: Partial<FilterState> = {},
   pagination: Partial<PaginationState> = {}
@@ -252,13 +272,22 @@ export async function fetchCustomers(
     params.append('page', String(pagination.page || 1));
     params.append('page_size', String(pagination.pageSize || 20));
 
+    // Forward segment filter — reverse map frontend name to backend name
     if (filters.segment && filters.segment !== 'all') {
-      // Reverse map frontend segment to backend if needed, or backend handles fuzzy
-      // Backend expects specific names. 
-      // Simpler: Fetch all and filter client side OR implement strict mapping.
-      // Let's pass it through and hope exact match or handle generically.
-      // For now, let's assume backend filters might not catch "Loyal" vs "Loyal Customer" exactly without mapping.
-      // We'll skip server filtering for segment to ensure data flow, or map roughly.
+      params.append('segment', reverseMapSegment(filters.segment));
+    }
+    if (filters.healthBand && filters.healthBand !== 'all') {
+      params.append('health_band', filters.healthBand.toLowerCase());
+    }
+    if (filters.priority && filters.priority !== 'all') {
+      // Map frontend priority back to backend short form
+      const priorityMap: Record<string, string> = {
+        'High Value - Retain': 'save',
+        'High Value - Grow': 'grow',
+        'Low Value - Nurture': 'low',
+        'Low Value - Monitor': 'monitor',
+      };
+      params.append('priority', priorityMap[filters.priority] || filters.priority);
     }
 
     const res = await fetch(`${BASE_URL}/customers/?${params.toString()}`);
@@ -356,21 +385,26 @@ export async function fetchAlerts(): Promise<ApiResponse<Alert[]>> {
 }
 
 export async function acknowledgeAlert(alertId: string): Promise<ApiResponse<boolean>> {
-  return { success: true, data: true };
+  try {
+    const res = await fetch(`${BASE_URL}/alerts/acknowledge/${alertId}`, {
+      method: 'POST',
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return { success: true, data: true };
+  } catch (e) {
+    console.error('acknowledgeAlert error:', e);
+    return { success: true, data: true }; // Optimistic — still dismiss in UI
+  }
 }
 
 export async function fetchSegmentComparison(): Promise<ApiResponse<any>> {
   try {
     const res = await fetch(`${BASE_URL}/segments/`);
     const data = await res.json();
-    // Backend returns "health_comparison": { "data": [ {segment_name, ...} ] }
-    // Frontend expects { segments: [], metrics: [{name, values}] }
-
     const raw = data.health_comparison.data || [];
     const segments = raw.map((r: any) => mapSegmentDetail(r.segment_name));
 
-    // Metrics
-    const healthVals = raw.map((r: any) => Math.round((r.health_score || 0) * 100));
+    const healthVals = raw.map((r: any) => Math.round(r.health_score || 0));
     const churnVals = raw.map((r: any) => Math.round((r.churn_probability || 0) * 100));
 
     return {
@@ -392,21 +426,58 @@ export async function fetchPriorityMatrix(): Promise<ApiResponse<any>> {
   try {
     const res = await fetch(`${BASE_URL}/health/`);
     const data = await res.json();
-    // Backend returns "investment_matrix": [ { investment_priority: "grow", count: 10 } ]
-    // Frontend expects quadrants with avgClv, etc. 
-    // My backend only returned counts in that optimized query. 
-    // I should have returned more details. 
-    // For now, map what we can. 
-
     const quadrants = data.investment_matrix.map((m: any) => ({
       name: mapPriority(m.investment_priority),
       customers: m.count,
       avgClv: Math.round(m.avg_clv || 0),
       avgRisk: Math.round((m.avg_churn_prob || 0) * 100)
     }));
-
     return { success: true, data: { quadrants } };
   } catch (e) {
     return { success: false, data: { quadrants: [] } };
+  }
+}
+
+// ─── NEW: Segment Migrations ───────────────────────────────────────────────
+export async function fetchSegmentMigrations(): Promise<ApiResponse<any[]>> {
+  try {
+    const res = await fetch(`${BASE_URL}/segments/`);
+    const data = await res.json();
+    const migrations = (data.migrations || []).map((m: any) => ({
+      fromSegment: mapSegmentDetail(m.from_segment || m.segment_name || ''),
+      toSegment: mapSegmentDetail(m.to_segment || ''),
+      count: m.count || m.customer_count || 0,
+      date: m.snapshot_date || m.date || ''
+    }));
+    return { success: true, data: migrations };
+  } catch (e) {
+    console.error('fetchSegmentMigrations error:', e);
+    return { success: false, data: [] };
+  }
+}
+
+// ─── NEW: Actionable Customers ─────────────────────────────────────────────
+export async function fetchActionableCustomers(limit = 100): Promise<ApiResponse<Customer[]>> {
+  try {
+    const res = await fetch(`${BASE_URL}/health/actionable?limit=${limit}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const customers = (data.actionable_customers || []).map(mapCustomer);
+    return { success: true, data: customers };
+  } catch (e) {
+    console.error('fetchActionableCustomers error:', e);
+    return { success: false, data: [] };
+  }
+}
+
+// ─── NEW: Alert Summary (badge counts) ────────────────────────────────────
+export async function fetchAlertSummary(): Promise<ApiResponse<{ total: number; critical: number; high: number; medium: number }>> {
+  try {
+    const res = await fetch(`${BASE_URL}/alerts/summary`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return { success: true, data: await res.json() };
+  } catch (e) {
+    console.error('fetchAlertSummary error:', e);
+    return { success: false, data: { total: 0, critical: 0, high: 0, medium: 0 } };
   }
 }

@@ -4,7 +4,7 @@ import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { ChartContainer } from '../components/dashboard/ChartContainer';
 import { KPICard } from '../components/dashboard/KPICard';
 import { Button } from '../components/ui/button';
-import { fetchAlerts, acknowledgeAlert } from '../lib/api';
+import { fetchAlerts, acknowledgeAlert, fetchAlertSummary } from '../lib/api';
 import type { Alert } from '../lib/types';
 import { cn } from '../lib/utils';
 import {
@@ -21,14 +21,19 @@ import {
 export default function Alerts() {
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [summary, setSummary] = useState({ total: 0, critical: 0, high: 0, medium: 0 });
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unacknowledged'>('unacknowledged');
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const res = await fetchAlerts();
+      const [res, summaryRes] = await Promise.all([
+        fetchAlerts(),
+        fetchAlertSummary(),
+      ]);
       if (res.success) setAlerts(res.data);
+      if (summaryRes.success) setSummary(summaryRes.data);
       setLoading(false);
     }
     loadData();
@@ -107,23 +112,23 @@ export default function Alerts() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* KPI Cards */}
+        {/* Alert Summary KPI Cards (from backend) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <KPICard
-            title="Critical Alerts"
-            value={criticalCount}
+            title="Critical Churn Risk"
+            value={summary.critical}
             icon={AlertTriangle}
             variant="danger"
           />
           <KPICard
-            title="High Priority"
-            value={highCount}
+            title="High Risk Alerts"
+            value={summary.high}
             icon={Bell}
             variant="warning"
           />
           <KPICard
             title="Pending Review"
-            value={unacknowledgedCount}
+            value={alerts.filter(a => !a.acknowledged).length}
             icon={Activity}
             variant="info"
           />

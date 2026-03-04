@@ -68,7 +68,7 @@ export function SegmentBarChart({ data, dataKey, onBarClick, color }: SegmentBar
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => {
-            if (dataKey === 'avgClv') return `$${(value / 1000).toFixed(0)}K`;
+            if (dataKey === 'avgClv') return value >= 1000 ? `$${(value / 1000).toFixed(0)}K` : `$${value}`;
             if (dataKey === 'avgChurnRisk') return `${value}%`;
             return value;
           }}

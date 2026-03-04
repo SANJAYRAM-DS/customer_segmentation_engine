@@ -6,7 +6,7 @@ import { SegmentBarChart } from '../components/charts/SegmentBarChart';
 import { SegmentRadarChart } from '../components/charts/SegmentRadarChart';
 import { DataTable } from '../components/dashboard/DataTable';
 import { StatusBadge } from '../components/dashboard/StatusBadge';
-import { fetchSegmentDistribution, fetchSegmentComparison } from '../lib/api';
+import { fetchSegmentDistribution, fetchSegmentComparison, fetchSegmentMigrations } from '../lib/api';
 import type { SegmentDistribution } from '../lib/types';
 import { useDashboardStore } from '../store/dashboardStore';
 import { ColumnDef } from '@tanstack/react-table';
@@ -66,18 +66,21 @@ export default function Segmentation() {
     segments: string[];
     metrics: { name: string; values: number[] }[];
   } | null>(null);
+  const [migrations, setMigrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const [segmentRes, radarRes] = await Promise.all([
+      const [segmentRes, radarRes, migrationsRes] = await Promise.all([
         fetchSegmentDistribution(),
         fetchSegmentComparison(),
+        fetchSegmentMigrations(),
       ]);
 
       if (segmentRes.success) setSegmentData(segmentRes.data);
       if (radarRes.success) setRadarData(radarRes.data);
+      if (migrationsRes.success) setMigrations(migrationsRes.data);
       setLoading(false);
     }
     loadData();
@@ -148,14 +151,46 @@ export default function Segmentation() {
             <SegmentBarChart
               data={radarData ? radarData.segments.map((s, i) => ({
                 segment: s,
-                // We need to map back from the array struct. 
-                // radarData has { segments: [], metrics: [{name, values}] }
-                // match index
                 val: radarData.metrics.find(m => m.name === 'Health Score')?.values[i] || 0
               })) : []}
               dataKey="val"
-              color="#10b981" // Success color for health
+              color="#10b981"
             />
+          </ChartContainer>
+        )}
+
+        {/* Segment Migrations Table */}
+        {migrations.length > 0 && (
+          <ChartContainer
+            title="Segment Migrations"
+            subtitle="Customer movements between segments across snapshots"
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">From Segment</th>
+                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">To Segment</th>
+                    <th className="text-right py-2 px-3 text-muted-foreground font-medium">Count</th>
+                    <th className="text-right py-2 px-3 text-muted-foreground font-medium">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {migrations.map((m, i) => (
+                    <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                      <td className="py-2 px-3">
+                        <StatusBadge status={m.fromSegment} />
+                      </td>
+                      <td className="py-2 px-3">
+                        <StatusBadge status={m.toSegment} />
+                      </td>
+                      <td className="py-2 px-3 text-right font-medium">{m.count.toLocaleString()}</td>
+                      <td className="py-2 px-3 text-right text-muted-foreground">{m.date || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </ChartContainer>
         )}
       </div>
