@@ -3,6 +3,9 @@
 Thumbs.db
 *.swp
 
+# Interview Questions (local only)
+questions/
+
 # Python
 __pycache__/
 *.py[cod]
