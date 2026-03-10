@@ -1,10 +1,10 @@
 ---
-title: Customer Segmentation Engine
-emoji: 📊
-colorFrom: blue
-colorTo: purple
-sdk: docker
-pinned: false
+# title: Customer Segmentation Engine
+# emoji: 📊
+# colorFrom: blue
+# colorTo: purple
+# sdk: docker
+# pinned: false
 ---
 
 <div align="center">
@@ -20,7 +20,7 @@ pinned: false
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://docker.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[Live Demo](#deployment) · [API Docs](#api-reference) · [Architecture](#architecture) · [Getting Started](#getting-started)
+  [API Docs](#api-reference) · [Architecture](#architecture) · [Getting Started](#getting-started)
 
 </div>
 
